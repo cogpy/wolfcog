@@ -15,11 +15,13 @@ class WolfCogCoordinator:
     def __init__(self):
         self.running = False
         self.processes = {}
+        self.dashboard = None
         self.components = [
             {"name": "ecron-task-daemon", "path": "opencog/ecron-task-daemon.py"},
             {"name": "scheduler-daemon", "path": "daemons/scheduler/ecron-scheduler.py"},
             {"name": "admin-agent", "path": "agents/admin_agent.py"},
-            {"name": "director-agent", "path": "agents/director_agent.py"}
+            {"name": "director-agent", "path": "agents/director_agent.py"},
+            {"name": "symbolic-dashboard", "path": "daemons/dashboard/symbolic-state-dashboard.py"}
         ]
         
         # Setup signal handlers
