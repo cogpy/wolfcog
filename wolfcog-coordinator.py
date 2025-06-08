@@ -21,7 +21,9 @@ class WolfCogCoordinator:
             {"name": "scheduler-daemon", "path": "daemons/scheduler/ecron-scheduler.py"},
             {"name": "admin-agent", "path": "agents/admin_agent.py"},
             {"name": "director-agent", "path": "agents/director_agent.py"},
-            {"name": "symbolic-dashboard", "path": "daemons/dashboard/symbolic-state-dashboard.py"}
+            {"name": "symbolic-dashboard", "path": "daemons/dashboard/symbolic-state-dashboard.py"},
+            {"name": "conversational-agent", "path": "agents/conversational_agent.py"},
+            {"name": "memory-evolution-tracker", "path": "link/GitLink/memory-evolution-tracker.py"}
         ]
         
         # Setup signal handlers
