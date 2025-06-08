@@ -1,0 +1,11 @@
+(specifications->manifest
+  '("guile"
+    "guix"
+    "make"
+    "sbcl"
+    "python"
+    "gfortran"
+    "emacs"
+    "openjdk"
+    "clang"
+    "git"))
