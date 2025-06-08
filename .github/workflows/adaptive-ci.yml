@@ -1,0 +1,186 @@
+$ cd /home/runner/work/oc-util/oc-util && grep -A 20 -B 5 "apt install" .github/workflows/adaptive-ci.yml
+# Contributors Guide:
+# ===================
+# 
+# Adding New Dependencies:
+# ------------------------
+# 1. Add the package name to the 'dependencies' job's apt install command
+# 2. For complex dependencies, add a new step in the 'dependencies' job
+# 3. Test locally first by running: apt search <package-name>
+#
+# Adding New Platforms:
+# ---------------------
+# 1. Add the platform to the strategy matrix in the 'build' job
+# 2. Create platform-specific dependency installation steps
+# 3. Use conditional steps: if: runner.os == 'Windows'
+#
+# Adding New Build Configurations:
+# --------------------------------
+# 1. Add build types to the strategy matrix (e.g., Debug, Release, RelWithDebInfo)
+# 2. Modify the CMAKE_BUILD_TYPE environment variable
+# 3. Add any configuration-specific steps as needed
+#
+# Extending for Hypergraph Pattern Encoding:
+# ------------------------------------------
+# 1. Add specialized dependencies in the 'dependencies' job
+# 2. Create separate job for pattern encoding tests
+# 3. Add artifact uploads for pattern analysis results
+--
+    # --------------------------------
+    # Core compilation tools required for C++17 and CMake builds
+    - name: Install Build Essential Tools
+      run: |
+        echo "🔧 Installing build essential tools..."
+        sudo apt install -y \
+          build-essential \
+          cmake \
+          pkg-config \
+          git
+        
+        echo "✅ Build tools installed successfully"
+        
+        # Verify installation and versions
+        echo "📋 Installed versions:"
+        gcc --version | head -1
+        g++ --version | head -1
+        cmake --version | head -1
+
+    # Step 5: Install Guile Development Environment
+    # --------------------------------------------
+    # CRITICAL: Guile 2.2.2+ is mandatory for the project
+    # Contributors: Update version if project requirements change
+    - name: Install Guile Scheme Interpreter and Development Headers
+      run: |
+        echo "🔮 Installing Guile Scheme interpreter (version $MIN_GUILE_VERSION+)..."
+        
+        # Install Guile development package
+        # Using guile-2.2-dev which includes headers and libraries
+        sudo apt install -y \
+          guile-2.2 \
+          guile-2.2-dev \
+          guile-2.2-libs
+        
+        echo "✅ Guile installed successfully"
+        
+        # Verify Guile installation and version
+        echo "📋 Guile version information:"
+        guile --version | head -1
+        
+        # Verify pkg-config can find Guile
+        if pkg-config --exists guile-2.2; then
+          echo "✅ Guile pkg-config found"
+          echo "📋 Guile configuration:"
+          pkg-config --cflags --libs guile-2.2
+        else
+          echo "❌ Guile pkg-config not found"
+          exit 1
+        fi
+
+--
+    - name: Install GMP Development Headers
+      run: |
+        echo "🔢 Installing GMP (GNU Multiple Precision Arithmetic Library)..."
+        
+        # Install GMP development package
+        sudo apt install -y \
+          libgmp-dev \
+          libgmp10 \
+          libgmpxx4ldbl
+        
+        echo "✅ GMP installed successfully"
+        
+        # Verify GMP installation
+        echo "📋 GMP library information:"
+        find /usr -name "libgmp*" -type f 2>/dev/null | head -5
+        
+        # Check for GMP headers in standard and architecture-specific locations
+        if [ -f /usr/include/gmp.h ]; then
+          echo "✅ GMP headers found at /usr/include/gmp.h"
+        elif [ -f /usr/include/x86_64-linux-gnu/gmp.h ]; then
+          echo "✅ GMP headers found at /usr/include/x86_64-linux-gnu/gmp.h"
+        else
+          echo "❌ GMP headers not found in expected locations"
+          echo "Searching for gmp.h..."
+          find /usr -name "gmp.h" -type f 2>/dev/null | head -3
+          exit 1
+--
+      run: |
+        echo "🚀 Installing Boost libraries..."
+        
+        # Install comprehensive Boost development package
+        # This includes all components: variant, program_options, range, etc.
+        sudo apt install -y \
+          libboost-all-dev \
+          libboost-dev \
+          libboost1.83-dev
+        
+        echo "✅ Boost libraries installed successfully"
+        
+        # Verify Boost installation
+        echo "📋 Boost version information:"
+        if [ -f /usr/include/boost/version.hpp ]; then
+          echo "✅ Boost headers found"
+          grep "BOOST_VERSION " /usr/include/boost/version.hpp | head -1
+        else
+          echo "❌ Boost headers not found"
+          exit 1
+        fi
+
+    # Step 8: Install Additional Development Dependencies  
+    # --------------------------------------------------
+    # Additional libraries that may be needed for extended functionality
+    # Contributors: Add new dependencies here as needed
+    - name: Install Additional Development Dependencies
+      run: |
+        echo "📦 Installing additional development dependencies..."
+        
+        # Thread support and other utilities
+        sudo apt install -y \
+          libtool \
+          autoconf \
+          automake \
+          libreadline-dev \
+          libssl-dev \
+          zlib1g-dev \
+          libbz2-dev \
+          libncurses5-dev \
+          libffi-dev
+        
+        echo "✅ Additional dependencies installed successfully"
+
+    # Step 9: Dependency Verification Summary
+    # ---------------------------------------
+    # Comprehensive verification that all dependencies are properly installed
+    - name: Verify All Dependencies
+      run: |
+        echo "🔍 Performing comprehensive dependency verification..."
+        
+        # Create verification report
+--
+    # Quick reinstall of dependencies (should be fast due to caching)
+    - name: Install Dependencies
+      run: |
+        echo "🔄 Installing dependencies for build environment..."
+        sudo apt update -qq
+        sudo apt install -y \
+          build-essential \
+          cmake \
+          pkg-config \
+          guile-2.2-dev \
+          libgmp-dev \
+          libboost-all-dev \
+          libtool \
+          autoconf \
+          automake
+        echo "✅ Dependencies installed"
+
+    # Step 4: Create Build Directory
+    # ------------------------------
+    # Clean build environment setup
+    - name: Create Build Environment
+      run: |
+        echo "📁 Setting up build environment..."
+        mkdir -p build
+        cd build
+        echo "Build directory created: $(pwd)"
+<exited with exit code 0>

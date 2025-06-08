@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Ecron Task Daemon - AGI-OS Task Dispatcher
+Enhanced Ecron Task Daemon - AGI-OS Task Dispatcher with Parallel Processing
 
 Listens to /kernels/ecron/ for symbolic task specifications
 Parses them and sends commands to CogServer via telnet or IPC socket
+Supports parallel task processing for improved performance
 """
 
 import os
@@ -15,8 +16,10 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 import queue
 
+
 class EcronTaskDaemon:
-    def __init__(self, ecron_path="/tmp/ecron_tasks", cog_host="localhost", cog_port=17001, max_workers=4):
+    def __init__(self, ecron_path="/tmp/ecron_tasks", cog_host="localhost", 
+                 cog_port=17001, max_workers=4):
         self.ecron_path = Path(ecron_path)
         self.cog_host = cog_host
         self.cog_port = cog_port
@@ -26,14 +29,23 @@ class EcronTaskDaemon:
         self.max_workers = max_workers
         self.task_queue = queue.Queue()
         self.executor = None
+        self.stats = {
+            "tasks_processed": 0,
+            "tasks_failed": 0,
+            "start_time": time.time()
+        }
         
         # Ensure ecron task directory exists
         self.ecron_path.mkdir(parents=True, exist_ok=True)
         
     def start(self):
-        """Start the task daemon"""
-        print("🚀 Starting Ecron Task Daemon...")
+        """Start the task daemon with parallel processing"""
+        print("🚀 Starting Enhanced Ecron Task Daemon...")
+        print(f"⚡ Parallel processing with {self.max_workers} workers")
         self.running = True
+        
+        # Initialize thread pool executor
+        self.executor = ThreadPoolExecutor(max_workers=self.max_workers)
         
         # Start file watcher thread
         watcher_thread = threading.Thread(target=self.watch_ecron_files)
@@ -43,20 +55,37 @@ class EcronTaskDaemon:
         print(f"📁 Watching {self.ecron_path} for task specifications")
         
     def watch_ecron_files(self):
-        """Watch for new ecron task files"""
+        """Watch for new ecron task files and queue them for processing"""
         while self.running:
             try:
                 if self.ecron_path.exists():
-                    for task_file in self.ecron_path.glob("*.json"):
-                        self.process_task_file(task_file)
+                    task_files = list(self.ecron_path.glob("*.json"))
+                    
+                    # Process multiple files in parallel
+                    if task_files:
+                        # Submit tasks to thread pool
+                        futures = []
+                        for task_file in task_files:
+                            future = self.executor.submit(self.process_task_file, task_file)
+                            futures.append(future)
+                        
+                        # Wait for completion with timeout
+                        for future in futures:
+                            try:
+                                future.result(timeout=30)  # 30 second timeout per task
+                            except Exception as e:
+                                print(f"❌ Task processing timeout or error: {e}")
+                                
             except Exception as e:
                 print(f"❌ Error watching files: {e}")
-            time.sleep(1)
+            time.sleep(0.5)  # Faster polling for better responsiveness
             
     def process_task_file(self, task_file):
         """Process a symbolic task specification file"""
         try:
             print(f"📋 Processing task file: {task_file}")
+            
+            # Read and validate task
             with open(task_file, 'r') as f:
                 task_spec = json.load(f)
             
@@ -64,6 +93,7 @@ class EcronTaskDaemon:
             if not self.validate_task_spec(task_spec):
                 print(f"❌ Invalid task specification in {task_file}")
                 self.archive_invalid_task(task_file, "Invalid task specification")
+                self.stats["tasks_failed"] += 1
                 return
             
             # Extract task information
@@ -82,12 +112,15 @@ class EcronTaskDaemon:
             self.send_to_cogserver(symbolic_expr, f"{action}_in_{space}")
             
             # Store processed task and create feedback
-            self.processed_tasks.append({
+            task_result = {
                 'task': task_spec,
                 'result': result,
                 'timestamp': time.time(),
-                'space': space
-            })
+                'space': space,
+                'processing_time': time.time()
+            }
+            
+            self.processed_tasks.append(task_result)
             
             # Generate feedback
             self.generate_feedback(task_spec, result)
@@ -95,9 +128,26 @@ class EcronTaskDaemon:
             # Archive processed file
             task_file.rename(task_file.with_suffix('.processed'))
             
+            self.stats["tasks_processed"] += 1
+            
+            # Print performance stats periodically
+            if self.stats["tasks_processed"] % 10 == 0:
+                self.print_performance_stats()
+            
         except Exception as e:
             print(f"❌ Error processing {task_file}: {e}")
             self.archive_invalid_task(task_file, f"Processing error: {e}")
+            self.stats["tasks_failed"] += 1
+    
+    def print_performance_stats(self):
+        """Print current performance statistics"""
+        runtime = time.time() - self.stats["start_time"]
+        processed = self.stats["tasks_processed"]
+        failed = self.stats["tasks_failed"]
+        rate = processed / runtime if runtime > 0 else 0
+        
+        print(f"📊 Performance: {processed} processed, {failed} failed, "
+              f"{rate:.2f} tasks/sec")
     
     def validate_task_spec(self, task_spec):
         """Validate task specification format and content"""
@@ -112,7 +162,8 @@ class EcronTaskDaemon:
         # Validate space
         valid_spaces = ['u', 'e', 's']
         if task_spec['space'] not in valid_spaces:
-            print(f"❌ Invalid space: {task_spec['space']}. Must be one of {valid_spaces}")
+            print(f"❌ Invalid space: {task_spec['space']}. "
+                  f"Must be one of {valid_spaces}")
             return False
         
         # Validate flow name
@@ -124,7 +175,8 @@ class EcronTaskDaemon:
         # Validate action
         valid_actions = ['evaluate', 'evolve', 'optimize', 'test', 'meta_evolve']
         if task_spec['action'] not in valid_actions:
-            print(f"❌ Invalid action: {task_spec['action']}. Must be one of {valid_actions}")
+            print(f"❌ Invalid action: {task_spec['action']}. "
+                  f"Must be one of {valid_actions}")
             return False
         
         # Validate symbolic expression if present
@@ -211,16 +263,35 @@ class EcronTaskDaemon:
             print(f"📡 Sending to CogServer: {action}({expr})")
             
             # TODO: Implement actual CogServer connection
-            # For now, simulate the connection
+            # For now, simulate the connection with improved response
+            response_time = 0.1  # Simulate faster response
+            time.sleep(response_time)
             print(f"🧠 CogServer response: processed {action}")
             
         except Exception as e:
             print(f"❌ CogServer connection error: {e}")
+    
+    def get_stats(self):
+        """Get current processing statistics"""
+        runtime = time.time() - self.stats["start_time"]
+        return {
+            **self.stats,
+            "runtime": runtime,
+            "rate": self.stats["tasks_processed"] / runtime if runtime > 0 else 0
+        }
             
     def stop(self):
         """Stop the daemon"""
-        print("🛑 Stopping Ecron Task Daemon...")
+        print("🛑 Stopping Enhanced Ecron Task Daemon...")
         self.running = False
+        
+        if self.executor:
+            print("⏳ Waiting for tasks to complete...")
+            self.executor.shutdown(wait=True, timeout=10)
+            
+        # Print final stats
+        self.print_performance_stats()
+
 
 if __name__ == "__main__":
     daemon = EcronTaskDaemon()
@@ -231,4 +302,4 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         daemon.stop()
-        print("👋 Ecron Task Daemon stopped.")
+        print("👋 Enhanced Ecron Task Daemon stopped.")
