@@ -1,0 +1,34 @@
+{
+  "space": "s",
+  "timestamp": "2025-06-08T20:28:53.776133",
+  "nodes": {
+    "system_state": {
+      "id": "ss_001",
+      "content": "\u2297\u03a6(meta_system)",
+      "connections": [],
+      "created": "2025-06-08T20:28:53.776140",
+      "access_count": 0
+    },
+    "evolution_history": {
+      "id": "eh_001",
+      "content": "\u03b4\u03a8(self_modification)",
+      "connections": [],
+      "created": "2025-06-08T20:28:53.776143",
+      "access_count": 0
+    },
+    "architectural_model": {
+      "id": "am_001",
+      "content": "\u2207\u00d7\u03a9(structure)",
+      "connections": [],
+      "created": "2025-06-08T20:28:53.776145",
+      "access_count": 0
+    }
+  },
+  "connections": [],
+  "metadata": {
+    "version": "1.0",
+    "type": "symbolic_memory",
+    "capacity": 1000,
+    "node_count": 3
+  }
+}

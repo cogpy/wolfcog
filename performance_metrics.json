@@ -1,0 +1,48 @@
+{
+  "system": {
+    "timestamp": "2025-06-08T20:34:55.722929",
+    "load_avg": [
+      0.07,
+      0.07,
+      0.06
+    ],
+    "uptime": 909.6,
+    "memory": {
+      "total": 16772685824,
+      "used": 1311055872,
+      "available": 15461629952,
+      "percent": 7.816612591192837
+    }
+  },
+  "wolfcog": {
+    "uptime": 0.022160053253173828,
+    "tasks": {
+      "pending": 0,
+      "processed": 3,
+      "errors": 0,
+      "throughput": 0.6
+    },
+    "spaces": {
+      "u": {
+        "files": 3,
+        "total_size": 1958,
+        "last_modified": 1749414533.7754066
+      },
+      "e": {
+        "files": 3,
+        "total_size": 2329,
+        "last_modified": 1749414533.7754066
+      },
+      "s": {
+        "files": 3,
+        "total_size": 2525,
+        "last_modified": 1749414533.7754066
+      }
+    },
+    "components": {
+      "active_processes": 7,
+      "estimated_total_memory_mb": 350,
+      "health_status": "good"
+    }
+  }
+}

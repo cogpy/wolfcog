@@ -23,7 +23,8 @@ class WolfCogCoordinator:
             {"name": "director-agent", "path": "agents/director_agent.py"},
             {"name": "symbolic-dashboard", "path": "daemons/dashboard/symbolic-state-dashboard.py"},
             {"name": "conversational-agent", "path": "agents/conversational_agent.py"},
-            {"name": "memory-evolution-tracker", "path": "link/GitLink/memory-evolution-tracker.py"}
+            {"name": "memory-evolution-tracker", "path": "link/GitLink/memory-evolution-tracker.py"},
+            {"name": "performance-monitor", "path": "daemons/performance/performance-monitor.py"}
         ]
         
         # Setup signal handlers
@@ -109,7 +110,10 @@ class WolfCogCoordinator:
             print(f"❌ Failed to start {name}: {e}")
     
     def coordination_loop(self):
-        """Main coordination loop"""
+        """Main coordination loop with enhanced error handling"""
+        coordination_errors = 0
+        max_errors = 5
+        
         while self.running:
             try:
                 # Coordinate between components
@@ -121,10 +125,50 @@ class WolfCogCoordinator:
                 # Check system health
                 self.check_system_health()
                 
+                # Reset error counter on successful cycle
+                coordination_errors = 0
+                
+            except KeyboardInterrupt:
+                print("🛑 Received shutdown signal")
+                self.stop()
+                break
             except Exception as e:
-                print(f"❌ Coordination error: {e}")
+                coordination_errors += 1
+                print(f"❌ Coordination error ({coordination_errors}/{max_errors}): {e}")
+                
+                if coordination_errors >= max_errors:
+                    print("🚨 Too many coordination errors, entering safe mode")
+                    self.enter_safe_mode()
+                    break
+                    
+                # Progressive backoff on errors
+                time.sleep(min(coordination_errors * 5, 30))
+                continue
             
             time.sleep(10)  # Coordination cycle every 10 seconds
+    
+    def enter_safe_mode(self):
+        """Enter safe mode when too many errors occur"""
+        print("🛡️ Entering safe mode...")
+        
+        # Stop all components gracefully
+        for name, process in list(self.processes.items()):
+            try:
+                print(f"🛑 Stopping {name} for safe mode...")
+                process.terminate()
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                print(f"⚠️ Force killing {name}")
+                process.kill()
+            except Exception as e:
+                print(f"❌ Error stopping {name}: {e}")
+        
+        # Clear process list
+        self.processes.clear()
+        self.running = False
+        
+        print("✅ Safe mode activated - all components stopped")
+    
     
     def coordinate_components(self):
         """Coordinate between system components"""
@@ -185,16 +229,50 @@ class WolfCogCoordinator:
     def check_system_health(self):
         """Check health of system components"""
         active_components = 0
+        failed_components = []
         
         for name, process in self.processes.items():
             if process.poll() is None:  # Process is still running
                 active_components += 1
             else:
                 print(f"⚠️ Component {name} has stopped")
-                # Optionally restart components here
+                failed_components.append(name)
         
         if active_components != len(self.components):
             print(f"⚠️ System health: {active_components}/{len(self.components)} components active")
+            
+            # Attempt to restart failed components
+            if failed_components:
+                self.restart_failed_components(failed_components)
+    
+    def restart_failed_components(self, failed_components):
+        """Restart failed components with backoff strategy"""
+        for name in failed_components:
+            try:
+                # Find component definition
+                component = next((c for c in self.components if c["name"] == name), None)
+                if component:
+                    print(f"🔄 Attempting to restart {name}...")
+                    
+                    # Remove old process reference
+                    if name in self.processes:
+                        del self.processes[name]
+                    
+                    # Wait a moment before restart
+                    time.sleep(2)
+                    
+                    # Restart component
+                    self.start_component(component)
+                    
+                    # Verify restart
+                    if name in self.processes and self.processes[name].poll() is None:
+                        print(f"✅ Successfully restarted {name}")
+                    else:
+                        print(f"❌ Failed to restart {name}")
+                        
+            except Exception as e:
+                print(f"❌ Error restarting {name}: {e}")
+    
     
     def monitor_system(self):
         """Monitor overall system state"""

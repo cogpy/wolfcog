@@ -55,6 +55,12 @@ class EcronTaskDaemon:
             with open(task_file, 'r') as f:
                 task_spec = json.load(f)
             
+            # Validate task specification
+            if not self.validate_task_spec(task_spec):
+                print(f"❌ Invalid task specification in {task_file}")
+                self.archive_invalid_task(task_file, "Invalid task specification")
+                return
+            
             # Extract task information
             flow = task_spec.get('flow', 'unknown')
             space = task_spec.get('space', 'e')
@@ -86,6 +92,65 @@ class EcronTaskDaemon:
             
         except Exception as e:
             print(f"❌ Error processing {task_file}: {e}")
+            self.archive_invalid_task(task_file, f"Processing error: {e}")
+    
+    def validate_task_spec(self, task_spec):
+        """Validate task specification format and content"""
+        required_fields = ['flow', 'space', 'action']
+        
+        # Check required fields
+        for field in required_fields:
+            if field not in task_spec:
+                print(f"❌ Missing required field: {field}")
+                return False
+        
+        # Validate space
+        valid_spaces = ['u', 'e', 's']
+        if task_spec['space'] not in valid_spaces:
+            print(f"❌ Invalid space: {task_spec['space']}. Must be one of {valid_spaces}")
+            return False
+        
+        # Validate flow name
+        flow = task_spec['flow']
+        if not isinstance(flow, str) or len(flow) == 0:
+            print(f"❌ Invalid flow name: {flow}")
+            return False
+        
+        # Validate action
+        valid_actions = ['evaluate', 'evolve', 'optimize', 'test', 'meta_evolve']
+        if task_spec['action'] not in valid_actions:
+            print(f"❌ Invalid action: {task_spec['action']}. Must be one of {valid_actions}")
+            return False
+        
+        # Validate symbolic expression if present
+        if 'symbolic' in task_spec:
+            symbolic = task_spec['symbolic']
+            if not isinstance(symbolic, str):
+                print(f"❌ Invalid symbolic expression type: {type(symbolic)}")
+                return False
+        
+        return True
+    
+    def archive_invalid_task(self, task_file, reason):
+        """Archive invalid task with error information"""
+        try:
+            error_info = {
+                "original_file": str(task_file),
+                "error_reason": reason,
+                "timestamp": time.time()
+            }
+            
+            # Save error info
+            error_file = task_file.with_suffix('.error')
+            with open(error_file, 'w') as f:
+                json.dump(error_info, f, indent=2)
+            
+            # Remove original file
+            task_file.unlink()
+            print(f"📁 Archived invalid task to {error_file}")
+            
+        except Exception as e:
+            print(f"❌ Error archiving invalid task: {e}")
     
     def process_by_space(self, flow, space):
         """Process task according to symbolic space"""
