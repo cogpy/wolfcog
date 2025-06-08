@@ -52,23 +52,28 @@ guix shell -m .guix/manifest.scm
 guile .guix/bootstrap/stage0.scm
 ```
 
-### 2. Launch Wolf Kernels
-
-```scheme
-;; Load the symbolic microkernel
-(load "kernels/wolfcore.lisp")
-
-;; Start the kernel system
-(wolf-kernel)
-```
-
-### 3. Start System Daemons
+### 2. Launch Complete System
 
 ```bash
-# Start the Ecron task daemon
-python3 opencog/ecron-task-daemon.py &
+# Start the full WolfCog AGI-OS with all components
+python3 wolfcog-coordinator.py
+```
 
-# The system is now live and ready for symbolic operations
+This will start:
+- Symbolic spaces (u/e/s) with memory structures
+- Ecron task scheduler with feedback loops
+- Admin and Director persistent agents
+- Scheduler and Reflex daemons
+- Task processing pipeline
+
+### 3. Test Symbolic Operations
+
+```bash
+# Create symbolic tasks for processing
+echo '{"flow": "test_cognition", "space": "e", "symbolic": "∇(cognitive_pattern)", "action": "evolve"}' > /tmp/ecron_tasks/test.json
+
+# Monitor task processing
+ls -la /tmp/ecron_tasks/
 ```
 
 ## Core Components
@@ -88,9 +93,11 @@ python3 opencog/ecron-task-daemon.py &
 
 ### System Services
 
-- **Scheduler Daemon**: Runs Ecron and coordinates symbolic flows
-- **Reflex Daemon**: Monitors shells and self-modifying symbols for reactive responses
+- **Scheduler Daemon**: Runs Ecron and coordinates symbolic flows across spaces
+- **Reflex Daemon**: Monitors shells and self-modifying symbols for reactive responses  
 - **Services Daemon**: Handles GitLink, Cascade operations, and runtime triggers
+- **Admin Agent**: Persistent monitoring agent for system health and optimization
+- **Director Agent**: Logical reasoning agent for system coordination and inference
 
 ## Design Philosophy
 
@@ -107,6 +114,7 @@ WolfCog implements a cognitive architecture where:
 - [Guix Bootstrap Guide](docs/guix-bootstrap.md) - Environment setup and reproducibility
 - [Kernel Specification](docs/kernel-spec.md) - Detailed kernel documentation
 - [Symbolic Evolution](docs/symbolic-evolution.md) - Self-modification and improvement
+- [Next Steps Implementation](docs/next-steps-implementation.md) - Recently implemented cognitive capabilities
 
 ## Development
 

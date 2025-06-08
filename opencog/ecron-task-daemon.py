@@ -14,11 +14,16 @@ import threading
 from pathlib import Path
 
 class EcronTaskDaemon:
-    def __init__(self, ecron_path="/kernels/ecron/", cog_host="localhost", cog_port=17001):
+    def __init__(self, ecron_path="/tmp/ecron_tasks", cog_host="localhost", cog_port=17001):
         self.ecron_path = Path(ecron_path)
         self.cog_host = cog_host
         self.cog_port = cog_port
         self.running = False
+        self.feedback_queue = []
+        self.processed_tasks = []
+        
+        # Ensure ecron task directory exists
+        self.ecron_path.mkdir(parents=True, exist_ok=True)
         
     def start(self):
         """Start the task daemon"""
@@ -50,20 +55,85 @@ class EcronTaskDaemon:
             with open(task_file, 'r') as f:
                 task_spec = json.load(f)
             
-            # Parse symbolic specification
+            # Extract task information
+            flow = task_spec.get('flow', 'unknown')
+            space = task_spec.get('space', 'e')
             symbolic_expr = task_spec.get('symbolic', '')
             action = task_spec.get('action', 'evaluate')
             
+            print(f"🎯 Processing {flow} in {space} space")
             print(f"🔮 Symbolic expression: {symbolic_expr}")
             
+            # Process based on space
+            result = self.process_by_space(flow, space)
+            
             # Send to CogServer
-            self.send_to_cogserver(symbolic_expr, action)
+            self.send_to_cogserver(symbolic_expr, f"{action}_in_{space}")
+            
+            # Store processed task and create feedback
+            self.processed_tasks.append({
+                'task': task_spec,
+                'result': result,
+                'timestamp': time.time(),
+                'space': space
+            })
+            
+            # Generate feedback
+            self.generate_feedback(task_spec, result)
             
             # Archive processed file
             task_file.rename(task_file.with_suffix('.processed'))
             
         except Exception as e:
             print(f"❌ Error processing {task_file}: {e}")
+    
+    def process_by_space(self, flow, space):
+        """Process task according to symbolic space"""
+        if space == "u":
+            return self.process_user_space(flow)
+        elif space == "e":
+            return self.process_execution_space(flow)
+        elif space == "s":
+            return self.process_system_space(flow)
+        else:
+            return self.process_default(flow)
+    
+    def process_user_space(self, flow):
+        """Process user space symbolic flow"""
+        print("👤 User space processing")
+        return {"space": "user", "processed": flow, "interactive": True}
+    
+    def process_execution_space(self, flow):
+        """Process execution space symbolic flow"""
+        print("⚡ Execution space processing")
+        return {"space": "execution", "processed": flow, "runtime": True}
+    
+    def process_system_space(self, flow):
+        """Process system space symbolic flow"""
+        print("🔧 System space processing")
+        return {"space": "system", "processed": flow, "meta": True}
+    
+    def process_default(self, flow):
+        """Default processing"""
+        print("🔄 Default processing")
+        return {"space": "default", "processed": flow}
+    
+    def generate_feedback(self, task_data, result):
+        """Generate feedback for the symbolic memory system"""
+        feedback = {
+            "type": "task_completion",
+            "original_task": task_data,
+            "result": result,
+            "timestamp": time.time(),
+            "feedback_id": len(self.feedback_queue)
+        }
+        
+        self.feedback_queue.append(feedback)
+        print(f"🔄 Generated feedback: {feedback['feedback_id']}")
+        
+        # Limit feedback queue size
+        if len(self.feedback_queue) > 100:
+            self.feedback_queue = self.feedback_queue[-50:]
             
     def send_to_cogserver(self, expr, action):
         """Send command to CogServer via telnet/socket"""
