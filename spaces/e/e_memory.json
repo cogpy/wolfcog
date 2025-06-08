@@ -1,0 +1,34 @@
+{
+  "space": "e",
+  "timestamp": "2025-06-08T20:28:53.775862",
+  "nodes": {
+    "execution_flow": {
+      "id": "ef_001",
+      "content": "\u2202\u03a9(runtime_flow)",
+      "connections": [],
+      "created": "2025-06-08T20:28:53.775870",
+      "access_count": 0
+    },
+    "optimization_state": {
+      "id": "os_001",
+      "content": "\u2207\u00b2(performance)",
+      "connections": [],
+      "created": "2025-06-08T20:28:53.775873",
+      "access_count": 0
+    },
+    "resource_allocation": {
+      "id": "ra_001",
+      "content": "\u0398(resources)",
+      "connections": [],
+      "created": "2025-06-08T20:28:53.775876",
+      "access_count": 0
+    }
+  },
+  "connections": [],
+  "metadata": {
+    "version": "1.0",
+    "type": "symbolic_memory",
+    "capacity": 1000,
+    "node_count": 3
+  }
+}

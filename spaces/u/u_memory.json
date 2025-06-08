@@ -1,0 +1,34 @@
+{
+  "space": "u",
+  "timestamp": "2025-06-08T20:28:53.775616",
+  "nodes": {
+    "user_intent": {
+      "id": "ui_001",
+      "content": "\u2207(user_goals)",
+      "connections": [],
+      "created": "2025-06-08T20:28:53.775628",
+      "access_count": 0
+    },
+    "interaction_history": {
+      "id": "ih_001",
+      "content": "\u03a8(past_interactions)",
+      "connections": [],
+      "created": "2025-06-08T20:28:53.775631",
+      "access_count": 0
+    },
+    "preference_model": {
+      "id": "pm_001",
+      "content": "\u03a6(user_preferences)",
+      "connections": [],
+      "created": "2025-06-08T20:28:53.775634",
+      "access_count": 0
+    }
+  },
+  "connections": [],
+  "metadata": {
+    "version": "1.0",
+    "type": "symbolic_memory",
+    "capacity": 1000,
+    "node_count": 3
+  }
+}

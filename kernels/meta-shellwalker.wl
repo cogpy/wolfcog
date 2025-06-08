@@ -1,4 +1,43 @@
-(* Meta Shell Walker - Self-modifying symbolic shell *)
+(* Meta Shell Walker - Self-modifying symbolic shell with safety bounds *)
+
+(* Safety configuration *)
+$MetaShellSafetyLimits = <|
+  "maxRecursionDepth" -> 10,
+  "maxModifications" -> 100,
+  "maxMemoryNodes" -> 1000,
+  "allowedOperations" -> {"navigate", "create", "modify", "evolve"},
+  "forbiddenOperations" -> {"delete_system", "corrupt_memory", "infinite_loop"}
+|>;
+
+(* Safety validation function *)
+ValidateOperation[operation_String, context_] := Module[{safe},
+  safe = True;
+  
+  (* Check recursion depth *)
+  If[$MetaShellState["depth"] >= $MetaShellSafetyLimits["maxRecursionDepth"],
+    Print["🛡️ Safety limit reached: Maximum recursion depth"];
+    safe = False;
+  ];
+  
+  (* Check modification count *)
+  If[Length[$MetaShellState["recursions"]] >= $MetaShellSafetyLimits["maxModifications"],
+    Print["🛡️ Safety limit reached: Maximum modifications"];
+    safe = False;
+  ];
+  
+  (* Check forbidden operations *)
+  If[MemberQ[$MetaShellSafetyLimits["forbiddenOperations"], operation],
+    Print["🛡️ Safety violation: Forbidden operation - ", operation];
+    safe = False;
+  ];
+  
+  (* Check allowed operations *)
+  If[!MemberQ[$MetaShellSafetyLimits["allowedOperations"], operation],
+    Print["🛡️ Safety warning: Unrecognized operation - ", operation];
+  ];
+  
+  safe
+]
 
 (* MetaShellWalker - Recursive shell evolution *)
 MetaShellInit[] := Module[{},
@@ -25,14 +64,20 @@ InitializeSpaces[] := Module[{},
   |>;
 ]
 
-(* Navigate between symbolic spaces *)
+(* Navigate between symbolic spaces with safety checks *)
 NavigateToSpace[space_String] := Module[{},
+  If[!ValidateOperation["navigate", <|"target" -> space|>],
+    Print["❌ Navigation blocked by safety system"];
+    Return[$Failed];
+  ];
+  
   Print["🧭 Navigating to space: ", space];
   If[MemberQ[{"u", "e", "s"}, space],
     (* Push current space to stack for context nesting *)
     AppendTo[$MetaShellState["spaceStack"], $MetaShellState["currentSpace"]];
     $MetaShellState["currentSpace"] = space;
-    Print["📍 Now in ", space, " space"];,
+    $MetaShellState["depth"]++;
+    Print["📍 Now in ", space, " space (depth: ", $MetaShellState["depth"], ")"];,
     Print["❌ Invalid space: ", space]
   ];
 ]
