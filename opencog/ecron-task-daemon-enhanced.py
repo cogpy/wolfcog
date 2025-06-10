@@ -173,7 +173,7 @@ class EcronTaskDaemon:
             return False
         
         # Validate action
-        valid_actions = ['evaluate', 'evolve', 'optimize', 'test', 'meta_evolve']
+        valid_actions = ['evaluate', 'evolve', 'optimize', 'test', 'meta_evolve', 'process']
         if task_spec['action'] not in valid_actions:
             print(f"❌ Invalid action: {task_spec['action']}. "
                   f"Must be one of {valid_actions}")
@@ -185,8 +185,44 @@ class EcronTaskDaemon:
             if not isinstance(symbolic, str):
                 print(f"❌ Invalid symbolic expression type: {type(symbolic)}")
                 return False
+            
+            # Check for basic syntax errors in symbolic expressions
+            if not self.validate_symbolic_syntax(symbolic):
+                print(f"❌ Invalid symbolic syntax: {symbolic}")
+                return False
+        else:
+            # For most actions, symbolic expression should be present
+            if task_spec['action'] in ['evaluate', 'process']:
+                print(f"❌ Missing symbolic expression for action: {task_spec['action']}")
+                return False
         
         return True
+    
+    def validate_symbolic_syntax(self, symbolic):
+        """Basic validation of symbolic expression syntax"""
+        if not symbolic or len(symbolic.strip()) == 0:
+            return False
+        
+        # Check for unmatched brackets
+        stack = []
+        bracket_pairs = {'(': ')', '[': ']', '{': '}'}
+        
+        for char in symbolic:
+            if char in bracket_pairs:
+                stack.append(char)
+            elif char in bracket_pairs.values():
+                if not stack:
+                    return False
+                expected_open = None
+                for open_bracket, close_bracket in bracket_pairs.items():
+                    if close_bracket == char:
+                        expected_open = open_bracket
+                        break
+                if stack.pop() != expected_open:
+                    return False
+        
+        # Should have no unmatched opening brackets
+        return len(stack) == 0
     
     def archive_invalid_task(self, task_file, reason):
         """Archive invalid task with error information"""

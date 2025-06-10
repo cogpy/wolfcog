@@ -28,7 +28,7 @@
     "validation_details": {
       "component": "wolfram-opencog-bridge",
       "path": "kernels/wolfram-opencog-bridge.scm",
-      "validation_time": "2025-06-10T15:09:50.050459",
+      "validation_time": "2025-06-10T16:06:26.224709",
       "tests": {
         "file_exists": {
           "test": "file_exists",
@@ -76,18 +76,18 @@
         "details": "Guile not available"
       },
       "wolfram_opencog": {
-        "status": "error",
-        "details": "Bridge error: Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"/home/runner/work/wolfcog/wolfcog/src/wolfram_opencog_bridge.py\", line 49\n    from opencog.type_constructors import *\n                                          ^\nSyntaxError: import * only allowed at module level\n"
+        "status": "working",
+        "details": "Wolfram bridge imports and instantiates"
       },
       "integration_bridge": {
-        "status": "error",
-        "details": "Integration error: Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"/home/runner/work/wolfcog/wolfcog/src/wolfram_opencog_integration.py\", line 16, in <module>\n    from symbolic_processor import RealSymbolicProcessor\nModuleNotFoundError: No module named 'symbolic_processor'\n"
+        "status": "working",
+        "details": "Integration bridge functional"
       }
     },
-    "working_bridges": 0,
+    "working_bridges": 2,
     "total_bridges": 3,
-    "bridge_score": 0.0,
-    "overall_status": "needs_implementation"
+    "bridge_score": 0.6666666666666666,
+    "overall_status": "functional"
   },
   "performance": {
     "checks": {
@@ -120,11 +120,11 @@
     "details": "All essential files present"
   },
   "overall": {
-    "score": 0.6,
+    "score": 0.7333333333333333,
     "status": "PARTIAL_IMPLEMENTATION",
     "component_scores": {
       "component_audit": 0.0,
-      "bridge_tests": 0.0,
+      "bridge_tests": 0.6666666666666666,
       "performance_monitoring": 1.0,
       "codespace_integrity": 1.0,
       "workspace_recreation": 1.0

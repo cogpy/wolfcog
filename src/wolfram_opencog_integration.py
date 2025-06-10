@@ -13,8 +13,8 @@ import subprocess
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
-from symbolic_processor import RealSymbolicProcessor
-from wolfram_opencog_bridge import WolframOpenCogBridge
+from src.symbolic_processor import RealSymbolicProcessor
+from src.wolfram_opencog_bridge import WolframOpenCogBridge
 
 
 class WolframOpenCogIntegration:
