@@ -121,6 +121,60 @@ The devcontainer implements the complete AGI-OS cognitive flowchart:
    - Logging and emergent boot anomaly detection
    - Complete system status reporting
 
+## Troubleshooting
+
+### Build Issues
+
+#### Guix Binary Installation Freeze
+**Problem**: Container build freezes during Guix binary installation at the authorization step.
+
+**Solution**: The Dockerfile has been updated to handle this issue with:
+- Proper `find` command instead of problematic wildcard patterns
+- Timeout protection (30 seconds) to prevent infinite hangs
+- Graceful error handling that continues even if authorization fails
+
+#### Bootstrap Script Hangs
+**Problem**: The bootstrap script hangs during `guix pull` or package installation.
+
+**Solution**: Added timeout protection:
+- `guix pull --bootstrap`: 5-minute timeout
+- Package installation: 10-minute timeout  
+- Better error messages for debugging
+
+#### Network Issues
+**Problem**: Cannot download Guix binary or packages due to network restrictions.
+
+**Solutions**:
+- Check firewall settings and proxy configuration
+- Use alternative Guix mirrors if available
+- Build container on a system with better internet access
+
+### Runtime Issues
+
+#### Guix Commands Not Found
+**Problem**: `guix` command not available after container startup.
+
+**Solutions**:
+- Restart the container to ensure all environment variables are loaded
+- Source the Guix profile manually: `source ~/.guix-profile/etc/profile`
+- Check if `/usr/local/bin/guix` symlink exists
+
+#### Wolfram Engine Not Found
+**Problem**: Wolfram kernels not available in the development environment.
+
+**Solutions**:
+- This is expected behavior when no Wolfram license is available
+- The system will operate in fallback mode using Guile and OpenCog
+- To add Wolfram support, obtain a free Wolfram Engine license and follow the installer guidance
+
+#### OpenCog Build Failures
+**Problem**: OpenCog components fail to build during bootstrap.
+
+**Solutions**:
+- Check build dependencies are available via the Guix manifest
+- Review build logs for specific error messages
+- Some build failures are expected and handled gracefully with `|| true`
+
 ## Benefits
 
 - **Reproducible Environment**: Exact dependency versions via Guix
@@ -129,5 +183,6 @@ The devcontainer implements the complete AGI-OS cognitive flowchart:
 - **Component Integration**: Seamless OpenCog and Wolfram kernel coordination
 - **Stage0 Bootstrap**: Complete cognitive architecture initialization
 - **Adaptive Attention**: Monitoring and reactive system responses
+- **Robust Error Handling**: Timeout protection and graceful degradation
 
 This devcontainer provides a complete, reproducible AGI-OS development nexus that implements the cognitive synergy between Guix, Guile, Wolfram kernels, and OpenCog components as specified in the original cognitive flowchart.
