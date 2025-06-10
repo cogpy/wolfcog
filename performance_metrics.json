@@ -1,47 +1,47 @@
 {
   "system": {
-    "timestamp": "2025-06-08T21:14:25.984304",
+    "timestamp": "2025-06-10T07:56:40.773142",
     "load_avg": [
-      0.89,
-      0.63,
-      0.58
+      0.12,
+      0.1,
+      0.05
     ],
-    "uptime": 22803.92,
+    "uptime": 707.53,
     "memory": {
-      "total": 8324300800,
-      "used": 3655966720,
-      "available": 4668334080,
-      "percent": 43.919204841804856
+      "total": 16772685824,
+      "used": 1285124096,
+      "available": 15487561728,
+      "percent": 7.662005414547972
     }
   },
   "wolfcog": {
-    "uptime": 0.01935887336730957,
+    "uptime": 0.027927160263061523,
     "tasks": {
-      "pending": 0,
-      "processed": 3,
-      "errors": 1,
-      "throughput": 0.6
+      "pending": 3,
+      "processed": 0,
+      "errors": 0,
+      "throughput": 0
     },
     "spaces": {
       "u": {
         "files": 3,
         "total_size": 1958,
-        "last_modified": 1749415936.0994704
+        "last_modified": 1749541536.9157932
       },
       "e": {
         "files": 3,
         "total_size": 2329,
-        "last_modified": 1749415936.0984702
+        "last_modified": 1749541536.9157932
       },
       "s": {
         "files": 3,
         "total_size": 2525,
-        "last_modified": 1749415936.0994704
+        "last_modified": 1749541536.9157932
       }
     },
     "components": {
-      "active_processes": 5,
-      "estimated_total_memory_mb": 250,
+      "active_processes": 8,
+      "estimated_total_memory_mb": 400,
       "health_status": "good"
     }
   }
