@@ -15,7 +15,17 @@ RUN useradd -ms /bin/bash dev && echo "dev ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoe
 
 # Install Guix using the official installation script
 COPY etc_guix-install.sh /tmp/etc_guix-install.sh
-RUN chmod +x /tmp/etc_guix-install.sh && /tmp/etc_guix-install.sh
+RUN chmod +x /tmp/etc_guix-install.sh && \
+    # Patch the script to support non-interactive mode
+    sed -i '/welcome()/,/^}/ { \
+        /^{$/ a\ \
+    # Return early if NONINTERACTIVE=1 is set\
+    if [ "$NONINTERACTIVE" = "1" ]; then\
+        return\
+    fi
+    }' /tmp/etc_guix-install.sh && \
+    # Run the script in non-interactive mode
+    NONINTERACTIVE=1 /tmp/etc_guix-install.sh
 
 # Switch to dev user and set up environment
 USER dev
