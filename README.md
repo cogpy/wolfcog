@@ -195,6 +195,15 @@ WolfCog implements a cognitive architecture where:
 
 ## Documentation
 
+📚 **[Complete Architecture Documentation Index](docs/README.md)** - Start here for comprehensive system documentation
+
+### Core Architecture
+- [Comprehensive Architecture](docs/architecture.md) - **Complete system architecture with Mermaid diagrams**
+- [Component Architecture](docs/component-architecture.md) - **Detailed component interactions and cognitive flows**
+- [Integration Pathways](docs/integration-pathways.md) - **Neural-symbolic integration and adaptive attention mechanisms**
+- [Emergent Patterns](docs/emergent-patterns.md) - **Recursive documentation evolution and cognitive pattern emergence**
+
+### System Design
 - [Design Overview](docs/design.md) - Complete architectural design
 - [Guix Bootstrap Guide](docs/guix-bootstrap.md) - Environment setup and reproducibility
 - [Kernel Specification](docs/kernel-spec.md) - Detailed kernel documentation
