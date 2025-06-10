@@ -16,26 +16,9 @@ RUN useradd -ms /bin/bash dev && echo "dev ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoe
 # Install Guix using the official installation script
 COPY etc_guix-install.sh /tmp/etc_guix-install.sh
 RUN chmod +x /tmp/etc_guix-install.sh && \
-    # Patch the script to support non-interactive mode
-    # This adds a check at the beginning of the welcome() function
-    # to return early if NONINTERACTIVE=1 is set
-    awk '
-    /^welcome\(\)$/ { in_welcome = 1; print; next }
-    in_welcome && /^{$/ { 
-        print
-        print "    # Return early if NONINTERACTIVE=1 is set"
-        print "    if [ \"$NONINTERACTIVE\" = \"1\" ]; then"
-        print "        return"
-        print "    fi"
-        next
-    }
-    in_welcome && /^}$/ { in_welcome = 0 }
-    { print }
-    ' /tmp/etc_guix-install.sh > /tmp/etc_guix-install-patched.sh && \
-    mv /tmp/etc_guix-install-patched.sh /tmp/etc_guix-install.sh && \
-    chmod +x /tmp/etc_guix-install.sh && \
-    # Run the script in non-interactive mode
-    NONINTERACTIVE=1 /tmp/etc_guix-install.sh
+    # Run the script in non-interactive mode by providing empty input
+    # Make installation optional to avoid blocking prebuild on network issues
+    echo '' | /tmp/etc_guix-install.sh || echo "Guix installation failed, continuing without it"
 
 # Switch to dev user and set up environment
 USER dev
