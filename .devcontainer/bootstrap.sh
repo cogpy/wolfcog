@@ -9,7 +9,7 @@ cd /workspace
 # Initialize Guix profile if not already done
 if [ ! -d "$HOME/.guix-profile" ]; then
     echo "📦 Initializing Guix profile..."
-    guix pull --bootstrap || true
+    timeout 300 guix pull --bootstrap || echo "⚠️ Guix pull failed or timed out, continuing..."
 fi
 
 # Load Guix profile if present
@@ -20,7 +20,7 @@ fi
 # Install packages from manifest if available
 if [ -f ".guix/manifest.scm" ]; then
     echo "📦 Installing packages from manifest..."
-    guix shell -m .guix/manifest.scm --check || guix install -m .guix/manifest.scm || true
+    timeout 600 guix shell -m .guix/manifest.scm --check || timeout 600 guix install -m .guix/manifest.scm || echo "⚠️ Package installation failed or timed out"
 fi
 
 # Stage0: Guile bootstrapping (ensure guile/guix present)
