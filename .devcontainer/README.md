@@ -1,0 +1,133 @@
+# Devcontainer Bootstrap Guide
+
+## Overview
+
+This devcontainer configuration implements the AGI-OS cognitive flowchart for WolfCog development, providing a reproducible, containerized workspace that integrates:
+
+- **Guix Environment**: Declarative package management with Stage0 bootstrapping
+- **Stage0 Bootloader**: Automated Guile boot process with Wolfram kernel configuration
+- **Wolfram Integration**: Optional Wolfram Engine support for symbolic computation
+- **OpenCog Components**: Automatic detection and building of cogutil, cogserver, atomspace
+- **Adaptive Attention**: Entry-point scripts for recursive system bring-up
+
+## Files
+
+### `.devcontainer/devcontainer.json`
+Main devcontainer configuration with:
+- Debian bookworm-slim base with Guix installation
+- Required capabilities and security options for AGI-OS
+- Port forwarding for OpenCog services (17001-17003)
+- Automatic bootstrap execution on container creation
+
+### `.devcontainer/Dockerfile` 
+Multi-stage container build:
+1. **Base Setup**: Debian with build tools and dependencies
+2. **Guix Installation**: Binary Guix installation with proper permissions
+3. **Environment Config**: Guile path setup and profile initialization
+4. **Wolfram Support**: Optional Wolfram Engine installation hooks
+
+### `.devcontainer/bootstrap.sh`
+Orchestrates the complete AGI-OS initialization:
+1. **Guix Profile**: Initialize and install manifest packages
+2. **Wolf Environment**: Configure environment variables and paths
+3. **OpenCog Verification**: Detect and prepare cogutil/cogserver/atomspace
+4. **Kernel Detection**: Verify Wolf kernel components
+5. **ASFS Setup**: Create symbolic filesystem mount points
+6. **Stage0 Ready**: Display available commands and startup options
+
+### `.devcontainer/wolfram-installer.sh`
+Wolfram Engine integration helper:
+- Detects existing Wolfram installations
+- Provides installation guidance for free Wolfram Engine
+- Creates symbolic links for system integration
+- Handles fallback modes without Wolfram kernels
+
+## Usage
+
+### 1. Open in VS Code
+
+```bash
+# Open repository in VS Code with devcontainer
+code .
+# Select "Reopen in Container" when prompted
+```
+
+### 2. Automatic Bootstrap
+
+The container automatically runs `.devcontainer/bootstrap.sh` which:
+- Sets up the complete AGI-OS environment
+- Verifies all components
+- Displays available commands
+
+### 3. Start Stage0 Bootstrap
+
+```bash
+# Inside the devcontainer
+guile .guix/bootstrap/init-shell.scm
+```
+
+This launches the Wolf Shell with:
+- Complete Stage0 bootstrap environment
+- Wolfram kernel detection and pooling
+- OpenCog component integration
+- Adaptive attention allocation system
+
+### 4. Run System Tests
+
+```bash
+# Validate the complete bootstrap system
+python3 test-bootstrap.py
+
+# Start the full WolfCog AGI-OS
+python3 wolfcog-coordinator.py
+```
+
+## Integration with Existing System
+
+The devcontainer leverages the existing WolfCog infrastructure:
+
+- **Manifest Integration**: Uses `.guix/manifest.scm` for package dependencies
+- **Stage0 Bootstrap**: Integrates with `.guix/bootstrap/stage0.scm` implementation
+- **Wolf Environment**: Uses `.guix/bootstrap/init-shell.scm` for environment setup
+- **Component Detection**: Leverages existing OpenCog and kernel verification
+- **Test Framework**: Extends `test-bootstrap.py` with devcontainer validation
+
+## Cognitive Flowchart Implementation
+
+The devcontainer implements the complete AGI-OS cognitive flowchart:
+
+1. **Guix Environment Initialization** ✓
+   - Declarative package environment via manifest.scm
+   - Guile and Stage0 artifact installation
+   - Essential build tools and shell access
+
+2. **Stage0 Bootloader Configuration** ✓  
+   - Automated Stage0 Guile boot process
+   - Wolfram kernel configuration options presentation
+   - OpenCog unified system integration
+
+3. **Wolfram Kernel Integration** ✓
+   - Optional Wolfram Engine installation
+   - Environment variables and pool configuration
+   - Fallback modes for development without licenses
+
+4. **OpenCog Component Initialization** ✓
+   - Automatic detection of cogutil/, cogserver/, atomspace/
+   - Build preparation with autogen.sh and configure
+   - Stage0 and bootloader linking to OpenCog services
+
+5. **Startup Scripts & Adaptive Attention** ✓
+   - Entry-point script for recursive system bring-up
+   - Logging and emergent boot anomaly detection
+   - Complete system status reporting
+
+## Benefits
+
+- **Reproducible Environment**: Exact dependency versions via Guix
+- **Isolated Development**: Container isolation prevents system pollution  
+- **Automatic Setup**: Zero-configuration AGI-OS development environment
+- **Component Integration**: Seamless OpenCog and Wolfram kernel coordination
+- **Stage0 Bootstrap**: Complete cognitive architecture initialization
+- **Adaptive Attention**: Monitoring and reactive system responses
+
+This devcontainer provides a complete, reproducible AGI-OS development nexus that implements the cognitive synergy between Guix, Guile, Wolfram kernels, and OpenCog components as specified in the original cognitive flowchart.

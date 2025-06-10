@@ -216,6 +216,51 @@ class BootstrapTest:
             print("  ✅ Bootstrap integration complete")
         else:
             print(f"  ⚠️ Partial integration: {len(integration_checks)}/2 checks passed")
+
+    def test_devcontainer_structure(self):
+        """Test that devcontainer files exist and are properly structured"""
+        print("\n🔍 Testing devcontainer structure...")
+        
+        required_files = [
+            ".devcontainer/devcontainer.json",
+            ".devcontainer/Dockerfile",
+            ".devcontainer/bootstrap.sh",
+            ".devcontainer/wolfram-installer.sh"
+        ]
+        
+        missing_files = []
+        for file_path in required_files:
+            full_path = self.repo_root / file_path
+            if not full_path.exists():
+                missing_files.append(file_path)
+            else:
+                print(f"  ✓ Found: {file_path}")
+        
+        # Validate JSON structure
+        devcontainer_json = self.repo_root / ".devcontainer/devcontainer.json"
+        json_valid = False
+        if devcontainer_json.exists():
+            try:
+                import json
+                with open(devcontainer_json, 'r') as f:
+                    config = json.load(f)
+                    if "name" in config and "build" in config:
+                        print("  ✓ devcontainer.json structure valid")
+                        json_valid = True
+                    else:
+                        print("  ⚠️ devcontainer.json missing required fields")
+            except json.JSONDecodeError:
+                print("  ❌ devcontainer.json is not valid JSON")
+        
+        if missing_files:
+            print(f"  ❌ Missing files: {missing_files}")
+            self.results["devcontainer_structure"] = {"status": "fail", "missing": missing_files}
+        elif not json_valid:
+            print("  ❌ devcontainer.json validation failed")
+            self.results["devcontainer_structure"] = {"status": "fail", "reason": "invalid_json"}
+        else:
+            print("  ✅ All devcontainer files present and valid")
+            self.results["devcontainer_structure"] = {"status": "pass", "files": required_files}
             
     def generate_report(self):
         """Generate comprehensive test report"""
@@ -298,6 +343,7 @@ def main():
     tester.test_kernel_structure()
     tester.test_manifest_content()
     tester.test_bootstrap_integration()
+    tester.test_devcontainer_structure()
     
     # Generate final report
     results = tester.generate_report()
