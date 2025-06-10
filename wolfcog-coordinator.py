@@ -86,13 +86,13 @@ class WolfCogCoordinator:
             self.start_component(component)
     
     def start_component(self, component):
-        """Start a specific component"""
+        """Start a specific component with enhanced error handling"""
         name = component["name"]
         path = component["path"]
         
         if not Path(path).exists():
-            print(f"❌ Component file not found: {path}")
-            return
+            print(f"⚠️  Component file not found: {path} (skipping)")
+            return False
         
         try:
             print(f"🚀 Starting {name}...")
@@ -103,11 +103,23 @@ class WolfCogCoordinator:
                 text=True
             )
             
+            # Wait a moment to see if process starts successfully
+            time.sleep(0.5)
+            if process.poll() is not None:
+                # Process already terminated
+                stdout, stderr = process.communicate()
+                print(f"❌ {name} failed to start:")
+                if stderr:
+                    print(f"   Error: {stderr.strip()}")
+                return False
+            
             self.processes[name] = process
-            print(f"✅ {name} started (PID: {process.pid})")
+            print(f"✅ {name} started successfully (PID: {process.pid})")
+            return True
             
         except Exception as e:
             print(f"❌ Failed to start {name}: {e}")
+            return False
     
     def coordination_loop(self):
         """Main coordination loop with enhanced error handling"""

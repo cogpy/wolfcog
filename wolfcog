@@ -1,0 +1,150 @@
+#!/usr/bin/env python3
+"""
+WolfCog CLI - Command Line Interface for AGI-OS Operations
+
+Makes everything amazing by providing easy-to-use commands for cognitive operations.
+"""
+
+import sys
+import json
+import time
+import argparse
+import subprocess
+from pathlib import Path
+
+class WolfCogCLI:
+    def __init__(self):
+        self.task_dir = Path("/tmp/ecron_tasks")
+        self.task_dir.mkdir(parents=True, exist_ok=True)
+        
+    def create_task(self, flow, space, action, symbolic="", test_id=None):
+        """Create a cognitive task for processing"""
+        task_spec = {
+            "flow": flow,
+            "space": space,
+            "action": action,
+            "symbolic": symbolic
+        }
+        
+        if test_id:
+            task_spec["test_id"] = test_id
+            
+        # Create unique filename
+        timestamp = str(int(time.time() * 1000))
+        task_file = self.task_dir / f"cli_task_{timestamp}.json"
+        
+        with open(task_file, 'w') as f:
+            json.dump(task_spec, f, indent=2)
+            
+        print(f"✨ Created cognitive task: {task_file}")
+        print(f"🎯 Flow: {flow}")
+        print(f"🌌 Space: {space}")
+        print(f"⚡ Action: {action}")
+        if symbolic:
+            print(f"🔮 Symbolic: {symbolic}")
+        
+        return task_file
+        
+    def list_tasks(self):
+        """List all pending tasks"""
+        tasks = list(self.task_dir.glob("*.json"))
+        processed = list(self.task_dir.glob("*.processed"))
+        errors = list(self.task_dir.glob("*.error"))
+        
+        print(f"📋 Task Status:")
+        print(f"   Pending: {len(tasks)} tasks")
+        print(f"   Processed: {len(processed)} tasks")
+        print(f"   Errors: {len(errors)} tasks")
+        
+        if tasks:
+            print("\n📝 Pending Tasks:")
+            for task in tasks:
+                try:
+                    with open(task) as f:
+                        spec = json.load(f)
+                    print(f"   • {task.name}: {spec['flow']} ({spec['space']}/{spec['action']})")
+                except:
+                    print(f"   • {task.name}: <invalid>")
+                    
+    def start_system(self):
+        """Start the WolfCog system"""
+        print("🚀 Starting WolfCog AGI-OS...")
+        try:
+            subprocess.run([sys.executable, "wolfcog-coordinator.py"], check=True)
+        except KeyboardInterrupt:
+            print("\n⏹️ WolfCog system stopped")
+        except FileNotFoundError:
+            print("❌ Error: wolfcog-coordinator.py not found")
+        except Exception as e:
+            print(f"❌ Error starting system: {e}")
+            
+    def test_system(self):
+        """Run integration tests"""
+        print("🧪 Running WolfCog integration tests...")
+        try:
+            result = subprocess.run([sys.executable, "test-integration.py"], 
+                                  capture_output=True, text=True)
+            print(result.stdout)
+            if result.stderr:
+                print("Errors:")
+                print(result.stderr)
+            return result.returncode == 0
+        except FileNotFoundError:
+            print("❌ Error: test-integration.py not found")
+            return False
+        except Exception as e:
+            print(f"❌ Error running tests: {e}")
+            return False
+
+def main():
+    parser = argparse.ArgumentParser(description="WolfCog CLI - Making everything amazing!")
+    subparsers = parser.add_subparsers(dest='command', help='Available commands')
+    
+    # Task creation
+    task_parser = subparsers.add_parser('task', help='Create a cognitive task')
+    task_parser.add_argument('flow', help='Task flow name')
+    task_parser.add_argument('space', choices=['u', 'e', 's'], help='Processing space')
+    task_parser.add_argument('action', 
+                           choices=['evaluate', 'evolve', 'optimize', 'test', 'meta_evolve', 'understand', 'analyze', 'synthesize'],
+                           help='Cognitive action')
+    task_parser.add_argument('--symbolic', default='', help='Symbolic expression')
+    task_parser.add_argument('--id', help='Task identifier')
+    
+    # List tasks
+    subparsers.add_parser('list', help='List all tasks')
+    
+    # System control
+    subparsers.add_parser('start', help='Start WolfCog system')
+    subparsers.add_parser('test', help='Run integration tests')
+    
+    # Status
+    status_parser = subparsers.add_parser('status', help='Show system status')
+    
+    args = parser.parse_args()
+    
+    if not args.command:
+        parser.print_help()
+        return
+        
+    cli = WolfCogCLI()
+    
+    if args.command == 'task':
+        import time
+        cli.create_task(args.flow, args.space, args.action, args.symbolic, args.id)
+    elif args.command == 'list':
+        cli.list_tasks()
+    elif args.command == 'start':
+        cli.start_system()
+    elif args.command == 'test':
+        success = cli.test_system()
+        sys.exit(0 if success else 1)
+    elif args.command == 'status':
+        cli.list_tasks()
+        print("\n🔍 System Status:")
+        print("   Use 'wolfcog test' to verify system health")
+        print("   Use 'wolfcog start' to launch the system")
+    else:
+        parser.print_help()
+
+if __name__ == '__main__':
+    main()

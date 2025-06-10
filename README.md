@@ -42,7 +42,59 @@ wolfcog/
 
 ## Quick Start
 
-### 1. Bootstrap the AGI-OS Environment
+### 1. Amazing Setup (Recommended)
+
+```bash
+# One-command setup that makes everything amazing
+./setup-amazing.sh
+```
+
+This amazing setup script will:
+- Check all dependencies automatically
+- Install Python requirements
+- Initialize OpenCog submodules
+- Test the complete system
+- Show you how to get started
+
+### 2. Using the WolfCog CLI
+
+```bash
+# Test the system
+./wolfcog test
+
+# Create cognitive tasks
+./wolfcog task "my_flow" u understand --symbolic "∇(cognitive_pattern)"
+
+# List all tasks
+./wolfcog list
+
+# Check system status  
+./wolfcog status
+
+# Start the full system
+./wolfcog start
+```
+
+### 4. Containerized Deployment (Amazing)
+
+```bash
+# Deploy the entire cognitive architecture in containers
+docker-compose up -d
+
+# View container status
+docker-compose ps
+
+# View logs from cognitive components
+docker-compose logs cogserver
+```
+
+The containerized deployment provides:
+- Isolated cognitive components (cogutil, atomspace, cogserver)  
+- Automated dependency management
+- Network configuration for component communication
+- Volume mounts for persistent cognitive data
+
+### 5. Manual Bootstrap (Advanced)
 
 ```bash
 # Enter the WolfCog AGI-OS environment
@@ -62,7 +114,17 @@ The Stage0 bootstrap implements:
 - **Security Enforcement**: Guix-inspired declarative constraints  
 - **Adaptive Attention**: Cognitive resource allocation
 
-### 2. Launch Complete System
+## Amazing Features
+
+🎯 **Smart CLI Interface**: Intuitive command-line interface for all operations
+🚀 **One-Command Setup**: Automated installation and configuration  
+🔧 **Enhanced Actions**: Extended cognitive action vocabulary (understand, analyze, synthesize)
+🐳 **Container Ready**: Full Docker Compose support for deployment
+✅ **Robust Testing**: Comprehensive integration tests with detailed feedback
+🔄 **Error Recovery**: Enhanced error handling and graceful failure management
+📊 **Real-time Status**: Live system monitoring and task tracking
+
+### 6. Launch Complete System
 
 ```bash
 # Start the full WolfCog AGI-OS with all components
@@ -76,7 +138,7 @@ This will start:
 - Scheduler and Reflex daemons
 - Task processing pipeline
 
-### 3. Test Symbolic Operations
+### 7. Test Symbolic Operations
 
 ```bash
 # Create symbolic tasks for processing
@@ -87,6 +149,19 @@ ls -la /tmp/ecron_tasks/
 ```
 
 ## Core Components
+
+### Enhanced Cognitive Actions
+
+WolfCog now supports an extended set of cognitive actions:
+
+- **evaluate**: Assess cognitive patterns and symbolic expressions
+- **evolve**: Drive evolutionary improvement of cognitive structures  
+- **optimize**: Enhance performance and efficiency of cognitive processes
+- **test**: Validate cognitive operations and system integrity
+- **meta_evolve**: Recursive self-improvement of the cognitive architecture
+- **understand**: Deep comprehension and interpretation of symbolic content
+- **analyze**: Systematic examination and decomposition of cognitive elements
+- **synthesize**: Creative combination and integration of cognitive components
 
 ### Wolf Kernels
 

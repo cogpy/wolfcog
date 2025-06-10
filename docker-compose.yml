@@ -1,0 +1,55 @@
+version: '3.9'
+
+services:
+  cogutil:
+    build: 
+      context: ./cogutil
+      dockerfile: Dockerfile
+    container_name: wolfcog-cogutil
+    environment:
+      - OPENCOG_LOG_LEVEL=INFO
+    command: ["sleep", "infinity"]
+    
+  atomspace:
+    build: 
+      context: ./atomspace
+      dockerfile: Dockerfile
+    container_name: wolfcog-atomspace
+    depends_on:
+      - cogutil
+    environment:
+      - OPENCOG_LOG_LEVEL=INFO
+      - COGUTIL_PATH=/usr/local
+    command: ["sleep", "infinity"]
+    
+  cogserver:
+    build: 
+      context: ./cogserver
+      dockerfile: Dockerfile
+    container_name: wolfcog-cogserver
+    depends_on:
+      - atomspace
+    ports:
+      - "17001:17001"
+    environment:
+      - OPENCOG_LOG_LEVEL=INFO
+      - ATOMSPACE_PATH=/usr/local
+    command: ["sleep", "infinity"]
+    
+  wolfcog-coordinator:
+    build:
+      context: .
+      dockerfile: Dockerfile.coordinator
+    container_name: wolfcog-coordinator
+    depends_on:
+      - cogserver
+    volumes:
+      - /tmp/ecron_tasks:/tmp/ecron_tasks
+    environment:
+      - COGSERVER_HOST=cogserver
+      - COGSERVER_PORT=17001
+    command: ["python3", "wolfcog-coordinator.py"]
+
+networks:
+  default:
+    name: wolfcog-network

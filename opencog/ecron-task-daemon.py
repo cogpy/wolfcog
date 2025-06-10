@@ -122,7 +122,7 @@ class EcronTaskDaemon:
             return False
         
         # Validate action
-        valid_actions = ['evaluate', 'evolve', 'optimize', 'test', 'meta_evolve']
+        valid_actions = ['evaluate', 'evolve', 'optimize', 'test', 'meta_evolve', 'understand', 'analyze', 'synthesize']
         if task_spec['action'] not in valid_actions:
             print(f"❌ Invalid action: {task_spec['action']}. Must be one of {valid_actions}")
             return False
