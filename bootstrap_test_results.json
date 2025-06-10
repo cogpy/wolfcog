@@ -1,0 +1,61 @@
+{
+  "bootstrap_files": {
+    "status": "pass",
+    "files": [
+      ".guix/manifest.scm",
+      ".guix/bootstrap/stage0.scm",
+      ".guix/bootstrap/stage0-bootstrap.scm",
+      ".guix/bootstrap/init-shell.scm"
+    ]
+  },
+  "bootstrap_content": {
+    "status": "pass",
+    "functions": [
+      "stage0-bootstrap",
+      "detect-wolfram-kernels",
+      "verify-opencog-unified",
+      "init-wolfram-pools",
+      "load-cogutil",
+      "load-cogserver",
+      "init-atomspace",
+      "mount-asfs",
+      "apply-guix-security",
+      "present-boot-options"
+    ]
+  },
+  "opencog_structure": {
+    "found": [
+      "cogutil",
+      "atomspace",
+      "cogserver"
+    ],
+    "missing": [],
+    "total_expected": 3
+  },
+  "kernel_structure": {
+    "found": [
+      "kernels/wolfcore.lisp",
+      "kernels/ecron.wl",
+      "kernels/wolfnode-guile.scm"
+    ],
+    "missing": []
+  },
+  "manifest": {
+    "status": "pass",
+    "found": [
+      "guile",
+      "sbcl",
+      "python",
+      "clang",
+      "git"
+    ],
+    "missing": []
+  },
+  "bootstrap_integration": {
+    "checks_passed": [
+      "stage0_launch",
+      "shell_init"
+    ],
+    "total_checks": 2
+  }
+}
