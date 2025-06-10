@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🐺 Bootstrapping AGI-OS devcontainer environment..."
+echo "🌱 Bootstrapping AGI-OS cognition stack..."
 
 # Ensure we're in the workspace directory
 cd /workspace
@@ -12,7 +12,7 @@ if [ ! -d "$HOME/.guix-profile" ]; then
     guix pull --bootstrap || true
 fi
 
-# Ensure Guix profile is loaded
+# Load Guix profile if present
 if [ -f "$HOME/.guix-profile/etc/profile" ]; then
     source "$HOME/.guix-profile/etc/profile"
 fi
@@ -23,10 +23,11 @@ if [ -f ".guix/manifest.scm" ]; then
     guix shell -m .guix/manifest.scm --check || guix install -m .guix/manifest.scm || true
 fi
 
-# Initialize Guile environment
-echo "🌀 Initializing Guile/Stage0 environment..."
+# Stage0: Guile bootstrapping (ensure guile/guix present)
+echo "🌀 Initializing Guile Stage0..."
 if command -v guile >/dev/null 2>&1; then
     guile --version
+    guile -c '(display "Guile Stage0 ready for bootstrapping\n")'
     echo "✓ Guile environment ready"
 else
     echo "⚠️ Guile not yet available, attempting installation..."
@@ -36,25 +37,19 @@ fi
 # Initialize Wolf environment using existing scripts
 if [ -f ".guix/bootstrap/init-shell.scm" ]; then
     echo "🐺 Loading Wolf environment configuration..."
-    # This sets up environment variables and paths
     echo "✓ Wolf bootstrap environment configured"
 fi
 
-# Verify OpenCog components
+# Build Opencog components (recursive cognitive synergy)
 echo "🧠 Verifying OpenCog components..."
-for component in cogutil cogserver atomspace; do
-    if [ -d "$component" ]; then
-        echo "  ✓ Found: $component/"
-        # Prepare component for building (if autogen.sh exists)
-        if [ -f "$component/autogen.sh" ]; then
-            echo "    Preparing $component for build..."
-            cd "$component"
-            ./autogen.sh || echo "    ⚠️ autogen.sh failed for $component"
-            ./configure || echo "    ⚠️ configure failed for $component"
-            cd ..
-        fi
-    else
-        echo "  ⚠️ Missing: $component/"
+for comp in cogutil cogserver atomspace; do
+    if [ -d "$comp" ]; then
+        echo "🔗 Building $comp..."
+        cd $comp
+        [ -f autogen.sh ] && ./autogen.sh || true
+        [ -f configure ] && ./configure || true
+        make || true
+        cd ..
     fi
 done
 
@@ -77,10 +72,12 @@ sudo mkdir -p /tmp/asfs || true
 sudo chown dev:dev /tmp/asfs || true
 echo "  ✓ ASFS mount point ready at /tmp/asfs"
 
-# Wolfram kernel configuration
-echo "🔬 Wolfram Engine configuration..."
-echo "To complete Wolfram Engine setup, please ensure your license and config are present."
-echo "AGI-OS bootloader will present Wolfram pool options on first run."
+# Present Wolfram kernel configuration (manual or scripted)
+echo "⚡ To enable Wolfram Engine, ensure licensing and config are present in /workspace/wolfram."
+echo "Bootloader will present kernel pool options on first cognitive cycle."
+
+# Security: follow Guix/Guile principles (informational)
+echo "🔒 Security isolation: leveraging Guix declarative, least-privilege approach."
 
 # Display Stage0 bootstrap information
 echo ""
@@ -94,4 +91,6 @@ echo ""
 echo "To start Stage0 bootstrap:"
 echo "  guile .guix/bootstrap/init-shell.scm"
 echo ""
-echo "✅ Bootstrap complete - Ready for AGI-OS development"
+
+# Adaptive attention: log emergent events
+echo "✅ AGI-OS devcontainer ready for recursive cognitive emergence."

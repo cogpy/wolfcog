@@ -1,6 +1,6 @@
 #!/bin/bash
-# Wolfram Engine Installer for AGI-OS Devcontainer
-# This is a placeholder script for Wolfram Engine installation
+# [OPTIONAL] Wolfram Engine headless installer placeholder
+# You must provide your own Wolfram Engine installer and license information.
 
 echo "🔬 Wolfram Engine Installer"
 echo "=========================="
@@ -33,6 +33,11 @@ else
     echo "3. Rebuild the devcontainer"
     echo ""
     echo "Alternative: Install Mathematica if you have a license"
+    echo ""
+    echo "⚡ (Placeholder) Install Wolfram Engine here if available."
+    # Example:
+    # wget https://wolfram.com/path/to/installer.sh
+    # bash installer.sh -- --unattended
     echo ""
     echo "The AGI-OS system will operate in fallback mode without Wolfram kernels."
 fi
