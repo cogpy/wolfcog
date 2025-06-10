@@ -126,20 +126,25 @@ The devcontainer implements the complete AGI-OS cognitive flowchart:
 ### Build Issues
 
 #### Guix Binary Installation Freeze
-**Problem**: Container build freezes during Guix binary installation at the authorization step.
+**Problem**: Container build freezes during Guix binary installation at various steps.
 
-**Solution**: The Dockerfile has been updated to handle this issue with:
-- Single timeout wrapper (60 seconds) for the entire authorization process
-- Pre-check for GNU store directory existence
-- Simplified key discovery using `find -print -quit` to avoid hanging
-- Improved error messages and progress reporting
-- Graceful fallback that continues build even if authorization fails
+**Solution**: The Dockerfile has been updated to handle this issue with comprehensive improvements:
+- **Granular Step Separation**: Split the complex RUN command into 5 separate steps for precise debugging
+- **Step-by-step Progress Tracking**: Added echo statements before and after each major operation
+- **Reduced Timeout**: Changed key authorization timeout from 60 to 5 seconds to prevent hanging
+- **Network Resilience**: Added fallback mirror for Guix binary download
+- **Robust Error Handling**: Added existence checks before each file operation
+- **Specific Cleanup**: Changed from `rm -rf /tmp/*` to `rm -rf /tmp/guix* /tmp/gnu*` for safety
+- **Graceful Fallback**: Continues build even if individual steps fail with warning messages
 
-**Technical Details**: The previous implementation used dual timeout commands (`timeout 30 find ... | timeout 30 xargs ...`) which could still hang if the pipeline blocked. The new approach uses a single timeout around a simplified shell script that:
-1. Checks if `/gnu/store` exists before searching
-2. Uses `find -print -quit` to exit immediately after finding the first match
-3. Provides clear status messages for debugging
-4. Ensures the build continues regardless of authorization success
+**Technical Details**: The previous implementation used a single complex RUN command that could hang at any step without clear indication. The new approach breaks down the process into:
+1. **Network/Archive Access**: Download with mirror fallback and completion verification
+2. **Filesystem Permissions**: Directory existence checks before moving with sudo
+3. **Symlink Creation**: Target existence verification before symlink creation  
+4. **Key Authorization**: Reduced timeout with enhanced progress feedback
+5. **Cleanup**: Specific file pattern cleanup to avoid affecting other processes
+
+Each step provides clear progress indicators and continues gracefully if optional operations fail.
 
 #### Bootstrap Script Hangs
 **Problem**: The bootstrap script hangs during `guix pull` or package installation.
