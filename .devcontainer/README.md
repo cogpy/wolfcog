@@ -135,6 +135,12 @@ The devcontainer implements the complete AGI-OS cognitive flowchart:
 - Improved error messages and progress reporting
 - Graceful fallback that continues build even if authorization fails
 
+**Technical Details**: The previous implementation used dual timeout commands (`timeout 30 find ... | timeout 30 xargs ...`) which could still hang if the pipeline blocked. The new approach uses a single timeout around a simplified shell script that:
+1. Checks if `/gnu/store` exists before searching
+2. Uses `find -print -quit` to exit immediately after finding the first match
+3. Provides clear status messages for debugging
+4. Ensures the build continues regardless of authorization success
+
 #### Bootstrap Script Hangs
 **Problem**: The bootstrap script hangs during `guix pull` or package installation.
 

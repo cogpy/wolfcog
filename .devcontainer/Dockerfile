@@ -16,6 +16,7 @@ RUN useradd -ms /bin/bash dev && echo "dev ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoe
 USER dev
 WORKDIR /workspace
 
+# Download, extract and install Guix binary with improved key authorization
 RUN cd /tmp && \
     wget -q https://ftp.gnu.org/gnu/guix/guix-binary-1.4.0.x86_64-linux.tar.xz && \
     tar --warning=no-timestamp -xf guix-binary-1.4.0.x86_64-linux.tar.xz && \
