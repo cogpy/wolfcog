@@ -17,13 +17,23 @@ RUN useradd -ms /bin/bash dev && echo "dev ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoe
 COPY etc_guix-install.sh /tmp/etc_guix-install.sh
 RUN chmod +x /tmp/etc_guix-install.sh && \
     # Patch the script to support non-interactive mode
-    sed -i '/welcome()/,/^}/ { \
-        /^{$/ a\ \
-    # Return early if NONINTERACTIVE=1 is set\
-    if [ "$NONINTERACTIVE" = "1" ]; then\
-        return\
-    fi
-    }' /tmp/etc_guix-install.sh && \
+    # This adds a check at the beginning of the welcome() function
+    # to return early if NONINTERACTIVE=1 is set
+    awk '
+    /^welcome\(\)$/ { in_welcome = 1; print; next }
+    in_welcome && /^{$/ { 
+        print
+        print "    # Return early if NONINTERACTIVE=1 is set"
+        print "    if [ \"$NONINTERACTIVE\" = \"1\" ]; then"
+        print "        return"
+        print "    fi"
+        next
+    }
+    in_welcome && /^}$/ { in_welcome = 0 }
+    { print }
+    ' /tmp/etc_guix-install.sh > /tmp/etc_guix-install-patched.sh && \
+    mv /tmp/etc_guix-install-patched.sh /tmp/etc_guix-install.sh && \
+    chmod +x /tmp/etc_guix-install.sh && \
     # Run the script in non-interactive mode
     NONINTERACTIVE=1 /tmp/etc_guix-install.sh
 
