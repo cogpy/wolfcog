@@ -1,0 +1,13 @@
+# Python dependencies for WolfCog AGI-OS
+# Core cognitive processing
+numpy>=1.20.0
+scipy>=1.7.0
+
+# Network and communication
+requests>=2.25.0
+
+# JSON and data processing (built-in modules primarily used)
+# pathlib, json, time, subprocess are built-in
+
+# Optional enhancements
+psutil>=5.8.0  # For system monitoring in agents
