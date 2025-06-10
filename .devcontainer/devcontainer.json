@@ -1,12 +1,6 @@
 {
   "name": "AGI-OS Devcontainer",
-  "build": {
-    "dockerfile": "Dockerfile"
-  },
-  "runArgs": [
-    "--cap-add=SYS_ADMIN",
-    "--security-opt", "apparmor=unconfined"
-  ],
+  "build": { "dockerfile": "Dockerfile" },
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
   "workspaceFolder": "/workspace",
   "postCreateCommand": "bash .devcontainer/bootstrap.sh",
@@ -14,6 +8,10 @@
     "terminal.integrated.shell.linux": "/bin/bash"
   },
   "forwardPorts": [17001, 17002, 17003],
+  "runArgs": [
+    "--cap-add=SYS_ADMIN",
+    "--security-opt", "apparmor=unconfined"
+  ],
   "extensions": [
     "ms-vscode.remote-containers"
   ]

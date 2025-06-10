@@ -1,18 +1,20 @@
 FROM debian:bookworm-slim
 
-# Install Guix and dependencies
-RUN apt-get update && \
-    apt-get install -y curl build-essential git wget xz-utils sudo && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# Install base dependencies and Guile/Guix
+RUN apt-get update && apt-get install -y \
+    curl build-essential guile-3.0 guile-3.0-dev git sudo wget locales xz-utils \
+    && rm -rf /var/lib/apt/lists/*
 
-# Create dev user
-RUN useradd -ms /bin/bash dev && \
-    echo "dev ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+# Set UTF-8 locale
+RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
+    locale-gen
 
-# Install Guix binary
+# Add user for devcontainer context
+RUN useradd -ms /bin/bash dev && echo "dev ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Install Guix binary (user-space) for reproducible package management
 USER dev
-WORKDIR /home/dev
+WORKDIR /workspace
 
 RUN cd /tmp && \
     wget -q https://ftp.gnu.org/gnu/guix/guix-binary-1.4.0.x86_64-linux.tar.xz && \
@@ -29,9 +31,8 @@ RUN echo 'export PATH="/home/dev/.guix-profile/bin:$PATH"' >> /home/dev/.bashrc 
     echo 'export GUIX_LOCPATH="/home/dev/.guix-profile/lib/locale"' >> /home/dev/.bashrc && \
     echo 'source /home/dev/.guix-profile/etc/profile' >> /home/dev/.bashrc
 
-# Optionally add Wolfram Engine if available
+# [Optional] Copy in a Wolfram installer script if you have licensing
 COPY --chown=dev:dev wolfram-installer.sh /tmp/wolfram-installer.sh
 RUN bash /tmp/wolfram-installer.sh || true
 
-USER dev
-WORKDIR /workspace
+# Entrypoint is set by devcontainer.json
