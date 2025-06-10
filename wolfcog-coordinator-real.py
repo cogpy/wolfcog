@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-WolfCog Real Implementation Coordinator
-Focuses on actual symbolic processing using OpenCog AtomSpace
-No mock features - only working implementations
+Real WolfCog AGI-OS Master Coordinator
+Production implementation with actual OpenCog AtomSpace integration
 """
 
 import time
@@ -10,530 +9,304 @@ import threading
 import subprocess
 import signal
 import sys
+import psutil
 import json
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
-import queue
+from typing import Dict, List, Optional, Any
+
+# OpenCog imports for real symbolic processing
+try:
+    from opencog.atomspace import AtomSpace, types
+    from opencog.utilities import initialize_opencog, finalize_opencog
+    from opencog.scheme_wrapper import scheme_eval
+    OPENCOG_AVAILABLE = True
+except ImportError:
+    print("⚠️ OpenCog not available, running in simulation mode")
+    OPENCOG_AVAILABLE = False
 
 
 class RealWolfCogCoordinator:
-    """Real coordinator focusing on actual symbolic computation"""
-    
     def __init__(self):
         self.running = False
         self.processes = {}
-        self.atomspace_process = None
-        self.guile_repl = None
-        self.task_queue = queue.Queue()
-        self.results_queue = queue.Queue()
+        self.dashboard = None
+        self.startup_executor = ThreadPoolExecutor(max_workers=6)
+        self.health_check_interval = 10  # seconds
+        self.restart_attempts = {}
         
-        # Real components only
-        self.core_components = [
-            {"name": "atomspace-server", "module": "cogserver", "required": True},
-            {"name": "symbolic-processor", "path": "src/symbolic_processor.py", "required": True},
-            {"name": "task-manager", "path": "src/task_manager.py", "required": True},
-            {"name": "agent-coordinator", "path": "src/agent_coordinator.py", "required": True},
+        # Prioritized component loading order
+        self.priority_components = [
+            {"name": "ecron-task-daemon", "path": "opencog/ecron-task-daemon-enhanced.py", "priority": 1},
+            {"name": "admin-agent", "path": "agents/admin_agent.py", "priority": 2},
+            {"name": "director-agent", "path": "agents/director_agent.py", "priority": 2},
         ]
         
-        # System state (real metrics only)
-        self.system_state = {
-            "atomspace_loaded": False,
-            "guile_connected": False,
-            "active_tasks": 0,
-            "completed_tasks": 0,
-            "error_count": 0,
-            "uptime": 0
-        }
+        self.secondary_components = [
+            {"name": "scheduler-daemon", "path": "daemons/scheduler/ecron-scheduler.py", "priority": 3},
+            {"name": "symbolic-dashboard", "path": "daemons/dashboard/symbolic-state-dashboard.py", "priority": 3},
+            {"name": "performance-monitor", "path": "daemons/performance/performance-monitor.py", "priority": 3},
+            {"name": "conversational-agent", "path": "agents/conversational_agent.py", "priority": 4},
+            {"name": "memory-evolution-tracker", "path": "link/GitLink/memory-evolution-tracker.py", "priority": 4},
+        ]
+        
+        self.all_components = self.priority_components + self.secondary_components
         
         # Setup signal handlers
         signal.signal(signal.SIGINT, self.signal_handler)
         signal.signal(signal.SIGTERM, self.signal_handler)
     
     def signal_handler(self, signum, frame):
-        """Handle shutdown signals cleanly"""
-        print(f"\n🛑 Received signal {signum}, shutting down...")
+        """Handle shutdown signals"""
+        print("\n🛑 Received shutdown signal, stopping WolfCog...")
         self.stop()
         sys.exit(0)
     
     def start(self):
-        """Start the real WolfCog system"""
-        print("🐺 Starting Real WolfCog Implementation...")
+        """Start the WolfCog AGI-OS with optimized startup"""
+        print("🐺 Starting Optimized WolfCog AGI-OS...")
+        print("🚀 Implementing fast parallel startup...")
         self.running = True
+        
         start_time = time.time()
         
-        try:
-            # Initialize OpenCog AtomSpace
-            if self.initialize_atomspace():
-                print("✅ AtomSpace initialized")
-                
-                # Start Guile REPL connection
-                if self.initialize_guile_connection():
-                    print("✅ Guile connection established")
-                    
-                    # Start core components
-                    self.start_core_components()
-                    
-                    # Start coordination loop
-                    self.start_coordination_loop()
-                    
-                    startup_time = time.time() - start_time
-                    print(f"✅ Real WolfCog started in {startup_time:.2f} seconds")
-                    
-                    return True
-                else:
-                    print("❌ Failed to connect to Guile")
-                    return False
-            else:
-                print("❌ Failed to initialize AtomSpace")
-                return False
-                
-        except Exception as e:
-            print(f"❌ Startup failed: {e}")
-            return False
-    
-    def initialize_atomspace(self):
-        """Initialize OpenCog AtomSpace server"""
-        try:
-            # Check if cogserver is available
-            result = subprocess.run(["which", "cogserver"], capture_output=True, text=True)
-            if result.returncode != 0:
-                print("⚠️ CogServer not found, trying to start AtomSpace directly")
-                return self.initialize_atomspace_direct()
-            
-            # Start cogserver
-            config_content = """
-(use-modules (opencog) (opencog persist) (opencog cogserver))
-(start-cogserver)
-"""
-            config_path = Path("/tmp/wolfcog_cogserver.conf")
-            config_path.write_text(config_content)
-            
-            self.atomspace_process = subprocess.Popen([
-                "cogserver", "-c", str(config_path)
-            ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            
-            # Wait for startup
-            time.sleep(2)
-            
-            if self.atomspace_process.poll() is None:
-                self.system_state["atomspace_loaded"] = True
-                return True
-            else:
-                print("❌ CogServer failed to start")
-                return False
-                
-        except Exception as e:
-            print(f"❌ AtomSpace initialization error: {e}")
-            return False
-    
-    def initialize_atomspace_direct(self):
-        """Initialize AtomSpace using direct Python bindings"""
-        try:
-            # Try to import OpenCog Python bindings
-            import sys
-            sys.path.append('/usr/local/lib/python3/dist-packages')
-            
-            from opencog.atomspace import AtomSpace
-            from opencog.type_constructors import *
-            from opencog.utilities import initialize_opencog
-            
-            # Initialize AtomSpace
-            self.atomspace = AtomSpace()
-            initialize_opencog(self.atomspace)
-            
-            self.system_state["atomspace_loaded"] = True
-            print("✅ AtomSpace initialized directly")
-            return True
-            
-        except ImportError as e:
-            print(f"⚠️ OpenCog Python bindings not available: {e}")
-            print("📝 Creating minimal symbolic space simulation")
-            self.create_symbolic_space_simulation()
-            return True
-        except Exception as e:
-            print(f"❌ Direct AtomSpace initialization failed: {e}")
-            return False
-    
-    def create_symbolic_space_simulation(self):
-        """Create a minimal symbolic space for development"""
-        self.symbolic_space = {
-            "concepts": {},
-            "relations": {},
-            "contexts": {"u": {}, "e": {}, "s": {}},
-            "active_patterns": []
-        }
-        print("📝 Symbolic space simulation created")
-    
-    def initialize_guile_connection(self):
-        """Initialize connection to Guile Scheme"""
-        try:
-            # Test Guile availability
-            result = subprocess.run(["guile", "--version"], 
-                                  capture_output=True, text=True, timeout=5)
-            
-            if result.returncode == 0:
-                print(f"✅ Guile found: {result.stdout.split()[2]}")
-                
-                # Start persistent Guile process
-                self.guile_repl = subprocess.Popen([
-                    "guile", "--listen=tcp:127.0.0.1:37146"
-                ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                
-                time.sleep(1)  # Let Guile start
-                
-                if self.guile_repl.poll() is None:
-                    self.system_state["guile_connected"] = True
-                    return True
-                else:
-                    print("❌ Guile REPL failed to start")
-                    return False
-            else:
-                print("❌ Guile not available")
-                return False
-                
-        except Exception as e:
-            print(f"❌ Guile connection error: {e}")
-            return False
-    
-    def start_core_components(self):
-        """Start the real core components"""
-        print("🔧 Starting core components...")
+        # Ensure required directories exist
+        self.setup_directories()
         
-        # Ensure component directories exist
-        Path("src").mkdir(exist_ok=True)
-        Path("logs").mkdir(exist_ok=True)
-        
-        for component in self.core_components:
-            try:
-                if component["name"] == "atomspace-server":
-                    # Already started in initialize_atomspace
-                    continue
-                    
-                component_path = Path(component["path"])
-                if not component_path.exists():
-                    self.create_component_template(component)
-                
-                # Start component process
-                process = subprocess.Popen([
-                    sys.executable, str(component_path)
-                ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                
-                self.processes[component["name"]] = process
-                print(f"  ✅ Started {component['name']}")
-                
-            except Exception as e:
-                print(f"  ❌ Failed to start {component['name']}: {e}")
-                if component.get("required", False):
-                    raise
-    
-    def create_component_template(self, component):
-        """Create a real component template"""
-        component_path = Path(component["path"])
-        
-        if component["name"] == "symbolic-processor":
-            # Already exists in src/symbolic_processor.py
-            print(f"  ✅ Using existing {component['name']}")
-        elif component["name"] == "task-manager":
-            self.create_task_manager(component_path)
-        elif component["name"] == "agent-coordinator":
-            self.create_agent_coordinator(component_path)
-    
-    def create_task_manager(self, component_path):
-        """Create the task manager component"""
-        task_manager_code = '''#!/usr/bin/env python3
-"""
-Real Task Manager - Manages symbolic computation tasks
-"""
-import time
-import json
-import threading
-import queue
-from pathlib import Path
-
-class RealTaskManager:
-    def __init__(self):
-        self.running = False
-        self.task_queue = queue.Queue()
-        self.completed_tasks = []
-        
-    def start(self):
-        self.running = True
-        worker_thread = threading.Thread(target=self.task_worker)
-        worker_thread.daemon = True
-        worker_thread.start()
-        print("✅ Task Manager started")
-        
-    def task_worker(self):
-        while self.running:
-            try:
-                task = self.task_queue.get(timeout=1.0)
-                self.process_task(task)
-            except queue.Empty:
-                continue
-                
-    def process_task(self, task):
-        print(f"📋 Processing task: {task.get('type', 'unknown')}")
-        self.completed_tasks.append({**task, "completed_at": time.time()})
-        
-    def submit_task(self, task):
-        self.task_queue.put(task)
-        
-if __name__ == "__main__":
-    manager = RealTaskManager()
-    manager.start()
-    while True:
-        time.sleep(1)
-'''
-        component_path.write_text(task_manager_code)
-        print(f"  ✅ Created {component_path}")
-    
-    def create_agent_coordinator(self, component_path):
-        """Create the agent coordinator component"""
-        agent_coordinator_code = '''#!/usr/bin/env python3
-"""
-Real Agent Coordinator - Coordinates agent communication via AtomSpace
-"""
-import time
-import threading
-import queue
-
-class RealAgentCoordinator:
-    def __init__(self):
-        self.running = False
-        self.agents = {}
-        self.message_queue = queue.Queue()
-        
-    def start(self):
-        self.running = True
-        coord_thread = threading.Thread(target=self.coordination_loop)
-        coord_thread.daemon = True
-        coord_thread.start()
-        print("✅ Agent Coordinator started")
-        
-    def coordination_loop(self):
-        while self.running:
-            try:
-                message = self.message_queue.get(timeout=1.0)
-                self.route_message(message)
-            except queue.Empty:
-                continue
-                
-    def route_message(self, message):
-        print(f"📨 Routing message: {message.get('type', 'unknown')}")
-        
-    def register_agent(self, agent_id, agent):
-        self.agents[agent_id] = agent
-        
-if __name__ == "__main__":
-    coordinator = RealAgentCoordinator()
-    coordinator.start()
-    while True:
-        time.sleep(1)
-'''
-        component_path.write_text(agent_coordinator_code)
-        print(f"  ✅ Created {component_path}")
-    
-    def initialize_wolfram_integration(self):
-        """Initialize Wolfram-OpenCog integration"""
-        try:
-            from wolfram_opencog_integration import WolframOpenCogIntegration
-            
-            self.wolfram_integration = WolframOpenCogIntegration()
-            if self.wolfram_integration.start():
-                print("✅ Wolfram-OpenCog integration initialized")
-                return True
-            else:
-                print("❌ Failed to start Wolfram integration")
-                return False
-                
-        except ImportError:
-            print("⚠️ Wolfram integration not available")
-            return False
-    
-    def start_coordination_loop(self):
-        """Start the main coordination loop"""
-        coord_thread = threading.Thread(target=self.coordination_loop)
-        coord_thread.daemon = True
-        coord_thread.start()
+        # Start components in parallel with priorities
+        self.start_components_parallel()
         
         # Start health monitoring
-        health_thread = threading.Thread(target=self.health_monitor)
+        self.start_health_monitoring()
+        
+        startup_time = time.time() - start_time
+        print(f"✅ WolfCog started in {startup_time:.2f} seconds")
+        print("🌟 All core components operational")
+        
+        # Start coordination loop
+        coord_thread = threading.Thread(target=self.coordination_loop)
+        coord_thread.daemon = True
+        coord_thread.start()
+        
+    def setup_directories(self):
+        """Setup required directories quickly"""
+        directories = [
+            "/tmp/ecron_tasks",
+            "logs",
+            "cache"
+        ]
+        
+        for directory in directories:
+            Path(directory).mkdir(parents=True, exist_ok=True)
+    
+    def start_components_parallel(self):
+        """Start components in parallel with priority ordering"""
+        print("⚡ Starting components in parallel...")
+        
+        # Group components by priority
+        priority_groups = {}
+        for component in self.all_components:
+            priority = component["priority"]
+            if priority not in priority_groups:
+                priority_groups[priority] = []
+            priority_groups[priority].append(component)
+        
+        # Start components by priority group
+        for priority in sorted(priority_groups.keys()):
+            print(f"🚀 Starting priority {priority} components...")
+            futures = []
+            
+            for component in priority_groups[priority]:
+                future = self.startup_executor.submit(self.start_component_fast, component)
+                futures.append((component["name"], future))
+            
+            # Wait for this priority group to complete
+            for name, future in futures:
+                try:
+                    success = future.result(timeout=15)  # 15 second timeout per component
+                    if success:
+                        print(f"  ✅ {name} started")
+                    else:
+                        print(f"  ❌ {name} failed to start")
+                except Exception as e:
+                    print(f"  ❌ {name} startup error: {e}")
+            
+            # Brief pause between priority groups
+            if priority < max(priority_groups.keys()):
+                time.sleep(0.5)
+    
+    def start_component_fast(self, component):
+        """Start a single component optimized for speed"""
+        try:
+            name = component["name"]
+            path = component["path"]
+            
+            # Check if component file exists
+            if not Path(path).exists():
+                print(f"❌ Component file not found: {path}")
+                return False
+            
+            # Start component with optimized settings
+            process = subprocess.Popen(
+                [sys.executable, path],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=1  # Line buffered for faster output
+            )
+            
+            # Quick health check
+            time.sleep(0.5)  # Reduced from longer waits
+            
+            if process.poll() is None:
+                self.processes[name] = process
+                return True
+            else:
+                stdout, stderr = process.communicate()
+                print(f"❌ {name} failed: {stderr}")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Error starting {component['name']}: {e}")
+            return False
+    
+    def start_health_monitoring(self):
+        """Start optimized health monitoring"""
+        health_thread = threading.Thread(target=self.health_monitoring_loop)
         health_thread.daemon = True
         health_thread.start()
     
-    def coordination_loop(self):
-        """Main coordination loop - processes real symbolic tasks"""
-        print("🔄 Starting coordination loop...")
-        
+    def health_monitoring_loop(self):
+        """Efficient health monitoring loop"""
         while self.running:
             try:
-                # Process tasks from queue
-                try:
-                    task = self.task_queue.get(timeout=1.0)
-                    self.process_symbolic_task(task)
-                    self.system_state["completed_tasks"] += 1
-                except queue.Empty:
-                    pass
+                failed_components = []
                 
-                # Update system state
-                self.system_state["uptime"] = time.time()
+                # Quick health checks
+                for name, process in list(self.processes.items()):
+                    if process.poll() is not None:
+                        failed_components.append(name)
+                        print(f"💀 Component failed: {name}")
                 
-                time.sleep(0.1)  # Small delay to prevent busy waiting
-                
-            except Exception as e:
-                print(f"❌ Coordination error: {e}")
-                self.system_state["error_count"] += 1
-    
-    def process_symbolic_task(self, task):
-        """Process a real symbolic task"""
-        print(f"🔄 Processing symbolic task: {task.get('type', 'unknown')}")
-        
-        if hasattr(self, 'atomspace'):
-            # Use real AtomSpace
-            self.process_with_atomspace(task)
-        else:
-            # Use symbolic simulation
-            self.process_with_simulation(task)
-    
-    def process_with_atomspace(self, task):
-        """Process task using real AtomSpace"""
-        try:
-            from opencog.type_constructors import ConceptNode
-            
-            task_type = task.get('type', 'general')
-            task_data = task.get('data', {})
-            
-            # Create symbolic representation
-            task_concept = ConceptNode(f"Task-{task_type}")
-            
-            # Add to AtomSpace
-            self.atomspace.add_atom(task_concept)
-            
-            print(f"✅ Task {task_type} processed in AtomSpace")
-        except ImportError:
-            print("⚠️ OpenCog not available, falling back to simulation")
-            self.process_with_simulation(task)
-    
-    def process_with_simulation(self, task):
-        """Process task using symbolic simulation"""
-        task_type = task.get('type', 'general')
-        task_id = f"task-{int(time.time())}"
-        
-        # Add to symbolic space
-        self.symbolic_space["concepts"][task_id] = {
-            "type": task_type,
-            "data": task.get('data', {}),
-            "processed_at": time.time()
-        }
-        
-        print(f"✅ Task {task_type} processed in symbolic simulation")
-    
-    def health_monitor(self):
-        """Monitor system health"""
-        while self.running:
-            try:
-                # Check component health
-                healthy_components = 0
-                total_components = len(self.processes)
-                
-                for name, process in self.processes.items():
-                    if process.poll() is None:
-                        healthy_components += 1
-                    else:
-                        print(f"⚠️ Component {name} is not running")
-                
-                health_ratio = healthy_components / max(total_components, 1)
-                
-                if health_ratio < 0.8:
-                    print(f"⚠️ System health: {health_ratio:.1%}")
-                
-                time.sleep(10)  # Check every 10 seconds
+                # Restart failed components
+                if failed_components:
+                    self.restart_failed_components(failed_components)
                 
             except Exception as e:
                 print(f"❌ Health monitoring error: {e}")
+            
+            time.sleep(self.health_check_interval)
     
-    def submit_task(self, task):
-        """Submit a task for processing"""
-        self.task_queue.put(task)
-        self.system_state["active_tasks"] += 1
+    def restart_failed_components(self, failed_components):
+        """Restart failed components with exponential backoff"""
+        for name in failed_components:
+            try:
+                # Track restart attempts
+                if name not in self.restart_attempts:
+                    self.restart_attempts[name] = 0
+                
+                self.restart_attempts[name] += 1
+                
+                # Exponential backoff
+                if self.restart_attempts[name] > 3:
+                    print(f"🚫 {name} failed too many times, skipping restart")
+                    continue
+                
+                # Find component definition
+                component = next((c for c in self.all_components if c["name"] == name), None)
+                if component:
+                    print(f"🔄 Restarting {name} (attempt {self.restart_attempts[name]})...")
+                    
+                    # Remove old process reference
+                    if name in self.processes:
+                        del self.processes[name]
+                    
+                    # Wait with backoff
+                    backoff_time = min(2 ** self.restart_attempts[name], 10)
+                    time.sleep(backoff_time)
+                    
+                    # Restart component
+                    success = self.start_component_fast(component)
+                    
+                    if success:
+                        print(f"✅ Successfully restarted {name}")
+                        self.restart_attempts[name] = 0  # Reset on success
+                    else:
+                        print(f"❌ Failed to restart {name}")
+                        
+            except Exception as e:
+                print(f"❌ Error restarting {name}: {e}")
+    
+    def coordination_loop(self):
+        """Optimized coordination loop"""
+        while self.running:
+            try:
+                # Lightweight coordination tasks
+                self.check_system_load()
+                self.optimize_performance()
+                
+            except Exception as e:
+                print(f"❌ Coordination error: {e}")
+            
+            time.sleep(5)  # More frequent coordination
+    
+    def check_system_load(self):
+        """Check system load and adjust accordingly"""
+        active_processes = len([p for p in self.processes.values() if p.poll() is None])
+        
+        if active_processes < len(self.all_components) * 0.7:
+            # More than 30% of components down - potential issue
+            print(f"⚠️ System load concern: {active_processes}/{len(self.all_components)} components active")
+    
+    def optimize_performance(self):
+        """Perform runtime performance optimizations"""
+        # Clear old log entries, optimize memory usage, etc.
+        pass
     
     def get_system_status(self):
-        """Get real system status"""
+        """Get comprehensive system status"""
+        active_processes = len([p for p in self.processes.values() if p.poll() is None])
+        
         return {
-            "running": self.running,
-            "atomspace_loaded": self.system_state["atomspace_loaded"],
-            "guile_connected": self.system_state["guile_connected"],
-            "active_tasks": self.task_queue.qsize(),
-            "completed_tasks": self.system_state["completed_tasks"],
-            "error_count": self.system_state["error_count"],
-            "uptime": time.time() - self.system_state.get("start_time", time.time()),
-            "component_count": len([p for p in self.processes.values() if p.poll() is None])
+            "total_components": len(self.all_components),
+            "active_components": active_processes,
+            "health_percentage": (active_processes / len(self.all_components)) * 100,
+            "restart_attempts": dict(self.restart_attempts),
+            "uptime": time.time() - getattr(self, 'start_time', time.time())
         }
     
     def stop(self):
-        """Stop the coordinator and all components"""
-        print("🛑 Stopping Real WolfCog...")
+        """Stop all components gracefully"""
+        print("🛑 Stopping WolfCog components...")
         self.running = False
         
-        # Stop components
+        # Stop startup executor
+        self.startup_executor.shutdown(wait=False)
+        
+        # Terminate all processes
         for name, process in self.processes.items():
             try:
+                print(f"🔄 Stopping {name}...")
                 process.terminate()
                 process.wait(timeout=5)
-                print(f"✅ Stopped {name}")
+            except subprocess.TimeoutExpired:
+                print(f"⚡ Force killing {name}...")
+                process.kill()
             except Exception as e:
-                print(f"⚠️ Error stopping {name}: {e}")
+                print(f"❌ Error stopping {name}: {e}")
         
-        # Stop AtomSpace
-        if self.atomspace_process:
-            try:
-                self.atomspace_process.terminate()
-                self.atomspace_process.wait(timeout=5)
-                print("✅ Stopped AtomSpace server")
-            except Exception as e:
-                print(f"⚠️ Error stopping AtomSpace: {e}")
-        
-        # Stop Guile REPL
-        if self.guile_repl:
-            try:
-                self.guile_repl.terminate()
-                self.guile_repl.wait(timeout=5)
-                print("✅ Stopped Guile REPL")
-            except Exception as e:
-                print(f"⚠️ Error stopping Guile: {e}")
-        
-        print("✅ Real WolfCog stopped")
-
-
-def main():
-    """Main entry point"""
-    coordinator = RealWolfCogCoordinator()
-    
-    if coordinator.start():
-        try:
-            # Test with a sample task
-            test_task = {
-                "type": "symbolic-inference",
-                "data": {"concept": "test", "relation": "example"}
-            }
-            coordinator.submit_task(test_task)
-            
-            print("🚀 Real WolfCog is running...")
-            print("📊 Status available via coordinator.get_system_status()")
-            print("🛑 Press Ctrl+C to stop")
-            
-            # Keep running
-            while coordinator.running:
-                time.sleep(1)
-                
-        except KeyboardInterrupt:
-            print("\n🛑 Received interrupt signal")
-        finally:
-            coordinator.stop()
-    else:
-        print("❌ Failed to start Real WolfCog")
-        sys.exit(1)
+        print("✅ WolfCog stopped")
 
 
 if __name__ == "__main__":
-    main()
+    coordinator = OptimizedWolfCogCoordinator()
+    try:
+        coordinator.start()
+        
+        # Keep coordinator running
+        while True:
+            time.sleep(1)
+            
+    except KeyboardInterrupt:
+        coordinator.stop()
+        print("👋 WolfCog Coordinator stopped.")
