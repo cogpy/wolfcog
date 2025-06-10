@@ -391,8 +391,9 @@ am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/pre-inst-env.in \
 	$(top_srcdir)/build-aux/ltmain.sh \
 	$(top_srcdir)/build-aux/missing AUTHORS COPYING COPYING.LESSER \
 	ChangeLog INSTALL NEWS README.md build-aux/compile \
-	build-aux/config.guess build-aux/config.sub \
-	build-aux/install-sh build-aux/ltmain.sh build-aux/missing
+	build-aux/config.guess build-aux/config.rpath \
+	build-aux/config.sub build-aux/install-sh build-aux/ltmain.sh \
+	build-aux/missing
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -450,7 +451,6 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 COPYRIGHT = @COPYRIGHT@
-CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CSCOPE = @CSCOPE@
 CTAGS = @CTAGS@
@@ -473,16 +473,8 @@ EXEEXT = @EXEEXT@
 FGREP = @FGREP@
 FILECMD = @FILECMD@
 GREP = @GREP@
-GUILD = @GUILD@
-GUILE = @GUILE@
 GUILE_CFLAGS = @GUILE_CFLAGS@
-GUILE_CONFIG = @GUILE_CONFIG@
-GUILE_EFFECTIVE_VERSION = @GUILE_EFFECTIVE_VERSION@
-GUILE_EXTENSION = @GUILE_EXTENSION@
 GUILE_LIBS = @GUILE_LIBS@
-GUILE_SITE = @GUILE_SITE@
-GUILE_SITE_CCACHE = @GUILE_SITE_CCACHE@
-GUILE_TOOLS = @GUILE_TOOLS@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -575,6 +567,7 @@ pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
+runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
