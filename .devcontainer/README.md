@@ -129,9 +129,17 @@ The devcontainer implements the complete AGI-OS cognitive flowchart:
 **Problem**: Container build freezes during Guix binary installation at the authorization step.
 
 **Solution**: The Dockerfile has been updated to handle this issue with:
-- Proper `find` command instead of problematic wildcard patterns
-- Timeout protection (30 seconds) to prevent infinite hangs
-- Graceful error handling that continues even if authorization fails
+- Single timeout wrapper (60 seconds) for the entire authorization process
+- Pre-check for GNU store directory existence
+- Simplified key discovery using `find -print -quit` to avoid hanging
+- Improved error messages and progress reporting
+- Graceful fallback that continues build even if authorization fails
+
+**Technical Details**: The previous implementation used dual timeout commands (`timeout 30 find ... | timeout 30 xargs ...`) which could still hang if the pipeline blocked. The new approach uses a single timeout around a simplified shell script that:
+1. Checks if `/gnu/store` exists before searching
+2. Uses `find -print -quit` to exit immediately after finding the first match
+3. Provides clear status messages for debugging
+4. Ensures the build continues regardless of authorization success
 
 #### Bootstrap Script Hangs
 **Problem**: The bootstrap script hangs during `guix pull` or package installation.
