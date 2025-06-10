@@ -42,15 +42,25 @@ wolfcog/
 
 ## Quick Start
 
-### 1. Bootstrap the Environment
+### 1. Bootstrap the AGI-OS Environment
 
 ```bash
-# Enter the WolfCog environment
+# Enter the WolfCog AGI-OS environment
 guix shell -m .guix/manifest.scm
 
-# Initialize bootstrap shell
+# Run Stage0 AGI-OS bootstrap sequence
 guile .guix/bootstrap/stage0.scm
+
+# Or interactive bootstrap shell
+guile .guix/bootstrap/init-shell.scm
 ```
+
+The Stage0 bootstrap implements:
+- **Wolfram Kernel Pool Detection**: Automatic discovery and configuration
+- **OpenCog Unified Integration**: CogUtil, AtomSpace, CogServer loading
+- **ASFS Initialization**: AtomSpace FileSystem mounting
+- **Security Enforcement**: Guix-inspired declarative constraints  
+- **Adaptive Attention**: Cognitive resource allocation
 
 ### 2. Launch Complete System
 

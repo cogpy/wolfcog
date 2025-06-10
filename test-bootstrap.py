@@ -224,8 +224,22 @@ class BootstrapTest:
         print("="*60)
         
         total_tests = len(self.results)
-        passed_tests = sum(1 for result in self.results.values() 
-                          if isinstance(result, dict) and result.get("status") == "pass")
+        passed_tests = 0
+        
+        # Count actual passes more accurately
+        for result in self.results.values():
+            if isinstance(result, dict):
+                if result.get("status") == "pass":
+                    passed_tests += 1
+                elif result.get("status") != "fail":
+                    # Check for successful completion indicators
+                    if ("found" in result and "missing" in result and 
+                        len(result["missing"]) == 0):
+                        passed_tests += 1
+                    elif ("checks_passed" in result and "total_checks" in result and
+                          result["checks_passed"] and 
+                          len(result["checks_passed"]) == result["total_checks"]):
+                        passed_tests += 1
         
         print(f"\n📊 Overall Results: {passed_tests}/{total_tests} tests passed")
         
@@ -240,6 +254,12 @@ class BootstrapTest:
                         print(f"     Reason: {result['reason']}")
                     if "missing" in result:
                         print(f"     Missing: {result['missing']}")
+                elif ("found" in result and "missing" in result and 
+                      len(result["missing"]) == 0):
+                    print("  ✅ PASS")
+                elif ("checks_passed" in result and 
+                      len(result["checks_passed"]) == result.get("total_checks", 0)):
+                    print("  ✅ PASS")
                 else:
                     print("  ⚠️ PARTIAL")
             else:

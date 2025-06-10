@@ -18,9 +18,29 @@ WolfCog uses GNU Guix as its foundation for reproducible, deterministic system b
 # Enter the WolfCog environment
 guix shell -m .guix/manifest.scm
 
-# Initialize the bootstrap shell
+# Initialize the bootstrap shell (interactive)
+guile .guix/bootstrap/init-shell.scm
+
+# Or run full Stage0 bootstrap sequence
 guile .guix/bootstrap/stage0.scm
 ```
+
+### 2. Stage0 AGI-OS Bootstrap
+
+The enhanced Stage0 bootstrap implements the complete cognitive flowchart:
+
+```scheme
+;; Load the bootstrap module
+(load ".guix/bootstrap/stage0-bootstrap.scm")
+
+;; Run complete bootstrap sequence
+(stage0-bootstrap)
+```
+
+This executes the recursive implementation pathway:
+- **Stage0** → Guile package load → Configuration UI → Kernel pool selection
+- **OpenCog** services bootstrap → ASFS initialization  
+- **Security** enforcement → Adaptive feedback/attention allocation
 
 ### 2. Manifest Configuration
 
@@ -42,20 +62,26 @@ The `.guix/manifest.scm` file defines the exact package versions and dependencie
 
 ### 3. Bootstrap Stages
 
-#### Stage 0: Basic Shell
-- Initializes Guile environment
-- Sets up readline interface
-- Prepares for kernel loading
+#### Stage 0: AGI-OS Initialization
+- Initializes Guile environment with core packages
+- Detects and configures Wolfram kernel pools
+- Verifies OpenCog Unified System components
+- Presents bootloader configuration interface
+- Applies Guix-inspired security mechanisms
 
-#### Stage 1: Kernel Loading
-- Loads WolfCore symbolic kernel
-- Initializes memory structures
-- Connects to daemon system
+#### Stage 1: Cognitive Platform Loading
+- Loads CogUtil (core utilities, logging, pattern-matching)
+- Initializes CogServer (distributed server, RPC, message passing)  
+- Sets up AtomSpace (hypergraph memory)
+- Mounts ASFS (AtomSpace FileSystem)
+- Establishes inter-component bridges
 
-#### Stage 2: Full System
-- Activates all Wolf kernels
-- Starts symbolic scheduler
-- Enables self-modification
+#### Stage 2: Adaptive System Activation
+- Registers CogServer with AtomSpace and ASFS
+- Starts adaptive attention allocation system
+- Activates symbolic evolution engine
+- Enables self-modification capabilities
+- Launches cognitive feedback loops
 
 ## Reproducibility
 
@@ -93,6 +119,19 @@ guix shell -m .guix/manifest.scm --container
 4. **Clang**: For LibraryLinkUtils compilation
 5. **Git**: For GitLink self-modification
 
+### AGI-OS Bootstrap Dependencies
+
+6. **Wolfram Engine/Mathematica**: For symbolic computation kernels
+7. **OpenCog Suite**: CogUtil, AtomSpace, CogServer for cognitive architecture
+8. **Guix**: For reproducible environment management
+
+### Automatic Detection
+
+The Stage0 bootstrap automatically detects:
+- Available Wolfram kernels (WolframScript, Mathematica)
+- OpenCog components (cogutil, atomspace, cogserver)
+- System capabilities and fallback options
+
 ### Optional Dependencies
 
 - **Emacs**: Development environment
@@ -114,9 +153,29 @@ guix shell -m .guix/manifest.scm
 ;; Load bootstrap
 (load ".guix/bootstrap/init-shell.scm")
 
-;; Start kernel
+;; Interactive commands available:
+(stage0-bootstrap)      ; Run full Stage0 bootstrap
+(detect-wolfram)        ; Detect Wolfram kernels
+(verify-opencog)        ; Check OpenCog components
+(wolf-shell-info)       ; Show available commands
+
+;; Start kernel manually
 (load "kernels/wolfcore.lisp")
 (wolf-kernel)
+```
+
+### 3. AGI-OS Bootstrap Testing
+
+```bash
+# Test bootstrap implementation
+python3 test-bootstrap.py
+
+# Validate specific components
+python3 -c "
+from test_bootstrap import BootstrapTest
+tester = BootstrapTest()
+tester.test_bootstrap_content_structure()
+"
 ```
 
 ### 3. Dependency Updates
@@ -194,3 +253,48 @@ The Guix environment integrates seamlessly with WolfCog components:
 - **OpenCog**: Integration through standardized Python environment
 
 This ensures that the entire WolfCog AGI system is reproducible, verifiable, and can be exactly replicated across different systems and time periods.
+
+## Stage0 AGI-OS Bootstrap
+
+The enhanced Stage0 bootstrap implements a comprehensive AGI operating system initialization:
+
+### Cognitive Architecture Integration
+
+```scheme
+;; Complete bootstrap following cognitive flowchart
+(stage0-bootstrap) 
+; → Guile packages → Bootloader UI → Kernel pools
+; → OpenCog services → ASFS → Security → Attention
+```
+
+### Component Discovery and Integration
+
+- **Automatic Detection**: Wolfram kernels, OpenCog components
+- **Fallback Mechanisms**: Graceful degradation when components missing  
+- **Security Enforcement**: Guix-inspired declarative constraints
+- **Symbolic Storage**: ASFS (AtomSpace FileSystem) integration
+
+### Adaptive Attention Allocation
+
+The bootstrap establishes an adaptive attention system:
+
+- **Primary Focus**: Robust, reproducible Guile-based bootstrap
+- **Secondary Focus**: Kernel orchestration and service integration  
+- **Dynamic Monitoring**: Emergent behavior in AtomSpace
+- **Feedback Loops**: Continuous system optimization
+
+### Bootstrap Validation
+
+```bash
+# Comprehensive bootstrap testing
+python3 test-bootstrap.py
+
+# Results show component status:
+# ✅ Bootstrap files: All present
+# ✅ Function structure: Complete  
+# ✅ OpenCog integration: Ready
+# ✅ Kernel availability: Detected
+# ✅ Security mechanisms: Active
+```
+
+This creates a foundation for the recursive AGI system described in the project vision.
