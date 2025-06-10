@@ -37,7 +37,6 @@ class RealSymbolicProcessor:
         try:
             # Try to use real OpenCog AtomSpace
             from opencog.atomspace import AtomSpace
-            from opencog.type_constructors import *
             from opencog.utilities import initialize_opencog
             
             self.atomspace = AtomSpace()

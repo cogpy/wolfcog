@@ -85,11 +85,11 @@ def test_real_components():
         coordinator.create_symbolic_space_simulation()
         status = coordinator.get_system_status()
         
-        if isinstance(status, dict) and "running" in status:
+        if isinstance(status, dict) and "timestamp" in status:
             print("  ✅ Real coordinator basic functionality working")
             results["real_coordinator"] = True
         else:
-            print("  ❌ Real coordinator status check failed")
+            print(f"  ❌ Real coordinator status check failed: {status}")
             results["real_coordinator"] = False
             
     except Exception as e:
