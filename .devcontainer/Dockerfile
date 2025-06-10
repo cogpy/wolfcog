@@ -23,7 +23,10 @@ RUN cd /tmp && \
     sudo mv gnu / && \
     sudo ln -sf /var/guix/profiles/per-user/root/current-guix/bin/guix /usr/local/bin/guix && \
     sudo ln -sf /var/guix/profiles/per-user/root/current-guix/bin/guix-daemon /usr/local/bin/guix-daemon && \
-    sudo guix archive --authorize < /gnu/store/*/share/guix/ci.guix.gnu.org.pub && \
+    echo "Authorizing Guix public key..." && \
+    timeout 30 find /gnu/store -name "ci.guix.gnu.org.pub" -type f -print0 | \
+    timeout 30 xargs -0 -r -I {} sudo guix archive --authorize < {} || \
+    echo "Warning: Guix public key authorization skipped (timeout or not found)" && \
     rm -rf /tmp/*
 
 # Set up Guile environment
