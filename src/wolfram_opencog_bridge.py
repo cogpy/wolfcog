@@ -46,7 +46,6 @@ class WolframOpenCogBridge:
         """Initialize OpenCog AtomSpace"""
         try:
             from opencog.atomspace import AtomSpace
-            from opencog.type_constructors import *
             from opencog.utilities import initialize_opencog
             
             self.atomspace = AtomSpace()
@@ -200,7 +199,7 @@ Print["KERNEL_READY"];
     def wolfram_to_atomspace_real(self, wolfram_expr):
         """Convert using real AtomSpace"""
         try:
-            from opencog.type_constructors import *
+            from opencog.type_constructors import ConceptNode, ListLink, ImplicationLink
             
             # Parse Wolfram expression and convert
             if isinstance(wolfram_expr, dict):

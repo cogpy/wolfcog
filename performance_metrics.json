@@ -1,21 +1,21 @@
 {
   "system": {
-    "timestamp": "2025-06-10T15:51:51.989977",
+    "timestamp": "2025-06-10T16:05:13.699809",
     "load_avg": [
-      0.18,
-      0.18,
-      0.09
+      0.01,
+      0.06,
+      0.07
     ],
-    "uptime": 267.49,
+    "uptime": 1069.2,
     "memory": {
       "total": 16772673536,
-      "used": 1256022016,
-      "available": 15516651520,
-      "percent": 7.488502135954291
+      "used": 1329082368,
+      "available": 15443591168,
+      "percent": 7.924093706035154
     }
   },
   "wolfcog": {
-    "uptime": 0.019284963607788086,
+    "uptime": 0.01842784881591797,
     "tasks": {
       "pending": 0,
       "processed": 3,
@@ -40,8 +40,8 @@
       }
     },
     "components": {
-      "active_processes": 8,
-      "estimated_total_memory_mb": 400,
+      "active_processes": 12,
+      "estimated_total_memory_mb": 600,
       "health_status": "good"
     }
   }
