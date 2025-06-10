@@ -57,5 +57,14 @@
       "shell_init"
     ],
     "total_checks": 2
+  },
+  "devcontainer_structure": {
+    "status": "pass",
+    "files": [
+      ".devcontainer/devcontainer.json",
+      ".devcontainer/Dockerfile",
+      ".devcontainer/bootstrap.sh",
+      ".devcontainer/wolfram-installer.sh"
+    ]
   }
 }
