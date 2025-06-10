@@ -28,7 +28,7 @@
     "validation_details": {
       "component": "wolfram-opencog-bridge",
       "path": "kernels/wolfram-opencog-bridge.scm",
-      "validation_time": "2025-06-10T16:04:20.801213",
+      "validation_time": "2025-06-10T16:06:26.224709",
       "tests": {
         "file_exists": {
           "test": "file_exists",
