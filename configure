@@ -684,6 +684,14 @@ LTLIBOBJS
 LIBOBJS
 guileobjectdir
 guilemoduledir
+GUILE_EXTENSION
+GUILE_SITE_CCACHE
+GUILE_SITE
+GUILE_TOOLS
+GUILE_CONFIG
+GUILD
+GUILE
+GUILE_EFFECTIVE_VERSION
 GUILE_LIBS
 GUILE_CFLAGS
 PKG_CONFIG_LIBDIR
@@ -17206,7 +17214,13 @@ printf "%s\n" "$as_me: WARNING: cannot determine SWIG version" >&2;}
         fi
 
 
-AX_SWIG_ENABLE_CXX
+
+
+
+        if test "z$SWIG" != "z"; then
+                SWIG="$SWIG -c++"
+        fi
+
 
 
 LLAMA_LIBS="-lllama"
@@ -17429,9 +17443,358 @@ printf "%s\n" "#define HAVE_GUILE 1" >>confdefs.h
 
 fi
 
-GUILE_PKG(3.0)
-GUILE_PROGS
-GUILE_SITE_DIR
+
+  if test "x$PKG_CONFIG" = x; then
+    as_fn_error $? "pkg-config is missing, please install it" "$LINENO" 5
+  fi
+  _guile_versions_to_search="3.0"
+  if test -n "$GUILE_EFFECTIVE_VERSION"; then
+    _guile_tmp=""
+    for v in $_guile_versions_to_search; do
+      if test "$v" = "$GUILE_EFFECTIVE_VERSION"; then
+        _guile_tmp=$v
+      fi
+    done
+    if test -z "$_guile_tmp"; then
+      { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+printf "%s\n" "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "searching for guile development files for versions $_guile_versions_to_search, but previously found $GUILE version $GUILE_EFFECTIVE_VERSION
+See \`config.log' for more details" "$LINENO" 5; }
+    fi
+    _guile_versions_to_search=$GUILE_EFFECTIVE_VERSION
+  fi
+  GUILE_EFFECTIVE_VERSION=""
+  _guile_errors=""
+  for v in $_guile_versions_to_search; do
+    if test -z "$GUILE_EFFECTIVE_VERSION"; then
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for guile $v" >&5
+printf "%s\n" "$as_me: checking for guile $v" >&6;}
+      if test -n "$PKG_CONFIG" && \
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"guile-\$v\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "guile-$v") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  GUILE_EFFECTIVE_VERSION=$v
+fi
+    fi
+  done
+
+  if test -z "$GUILE_EFFECTIVE_VERSION"; then
+    as_fn_error $? "
+No Guile development packages were found.
+
+Please verify that you have Guile installed.  If you installed Guile
+from a binary distribution, please verify that you have also installed
+the development packages.  If you installed it yourself, you might need
+to adjust your PKG_CONFIG_PATH; see the pkg-config man page for more.
+" "$LINENO" 5
+  fi
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: found guile $GUILE_EFFECTIVE_VERSION" >&5
+printf "%s\n" "$as_me: found guile $GUILE_EFFECTIVE_VERSION" >&6;}
+
+
+_guile_required_version="$GUILE_EFFECTIVE_VERSION"
+  if test -z "$_guile_required_version"; then
+    _guile_required_version=3.0
+  fi
+
+  _guile_candidates=guile
+  _tmp=
+  for v in `echo "$_guile_required_version" | tr . ' '`; do
+    if test -n "$_tmp"; then _tmp=$_tmp.; fi
+    _tmp=$_tmp$v
+    _guile_candidates="guile-$_tmp guile$_tmp $_guile_candidates"
+  done
+
+  for ac_prog in $_guile_candidates
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+printf %s "checking for $ac_word... " >&6; }
+if test ${ac_cv_path_GUILE+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  case $GUILE in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_GUILE="$GUILE" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  case $as_dir in #(((
+    '') as_dir=./ ;;
+    */) ;;
+    *) as_dir=$as_dir/ ;;
+  esac
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
+    ac_cv_path_GUILE="$as_dir$ac_word$ac_exec_ext"
+    printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+GUILE=$ac_cv_path_GUILE
+if test -n "$GUILE"; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $GUILE" >&5
+printf "%s\n" "$GUILE" >&6; }
+else
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+fi
+
+
+  test -n "$GUILE" && break
+done
+
+  if test -z "$GUILE"; then
+      as_fn_error $? "guile required but not found" "$LINENO" 5
+  fi
+
+  _guile_suffix=`echo "$GUILE" | sed -e 's,^.*/guile\(.*\)$,\1,'`
+  _guile_effective_version=`$GUILE -c "(display (effective-version))"`
+  if test -z "$GUILE_EFFECTIVE_VERSION"; then
+    GUILE_EFFECTIVE_VERSION=$_guile_effective_version
+  elif test "$GUILE_EFFECTIVE_VERSION" != "$_guile_effective_version"; then
+    as_fn_error $? "found development files for Guile $GUILE_EFFECTIVE_VERSION, but $GUILE has effective version $_guile_effective_version" "$LINENO" 5
+  fi
+
+  _guile_major_version=`$GUILE -c "(display (major-version))"`
+  _guile_minor_version=`$GUILE -c "(display (minor-version))"`
+  _guile_micro_version=`$GUILE -c "(display (micro-version))"`
+  _guile_prog_version="$_guile_major_version.$_guile_minor_version.$_guile_micro_version"
+
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Guile version >= $_guile_required_version" >&5
+printf %s "checking for Guile version >= $_guile_required_version... " >&6; }
+  _major_version=`echo $_guile_required_version | cut -d . -f 1`
+  _minor_version=`echo $_guile_required_version | cut -d . -f 2`
+  _micro_version=`echo $_guile_required_version | cut -d . -f 3`
+  if test "$_guile_major_version" -gt "$_major_version"; then
+    true
+  elif test "$_guile_major_version" -eq "$_major_version"; then
+    if test "$_guile_minor_version" -gt "$_minor_version"; then
+      true
+    elif test "$_guile_minor_version" -eq "$_minor_version"; then
+      if test -n "$_micro_version"; then
+        if test "$_guile_micro_version" -lt "$_micro_version"; then
+          as_fn_error $? "Guile $_guile_required_version required, but $_guile_prog_version found" "$LINENO" 5
+        fi
+      fi
+    elif test "$GUILE_EFFECTIVE_VERSION" = "$_major_version.$_minor_version" -a -z "$_micro_version"; then
+      # Allow prereleases that have the right effective version.
+      true
+    else
+      as_fn_error $? "Guile $_guile_required_version required, but $_guile_prog_version found" "$LINENO" 5
+    fi
+  elif test "$GUILE_EFFECTIVE_VERSION" = "$_major_version.$_minor_version" -a -z "$_micro_version"; then
+    # Allow prereleases that have the right effective version.
+    true
+  else
+    as_fn_error $? "Guile $_guile_required_version required, but $_guile_prog_version found" "$LINENO" 5
+  fi
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $_guile_prog_version" >&5
+printf "%s\n" "$_guile_prog_version" >&6; }
+
+  # Extract the first word of "guild$_guile_suffix", so it can be a program name with args.
+set dummy guild$_guile_suffix; ac_word=$2
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+printf %s "checking for $ac_word... " >&6; }
+if test ${ac_cv_path_GUILD+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  case $GUILD in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_GUILD="$GUILD" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  case $as_dir in #(((
+    '') as_dir=./ ;;
+    */) ;;
+    *) as_dir=$as_dir/ ;;
+  esac
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
+    ac_cv_path_GUILD="$as_dir$ac_word$ac_exec_ext"
+    printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+GUILD=$ac_cv_path_GUILD
+if test -n "$GUILD"; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $GUILD" >&5
+printf "%s\n" "$GUILD" >&6; }
+else
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+fi
+
+
+
+
+  # Extract the first word of "guile-config$_guile_suffix", so it can be a program name with args.
+set dummy guile-config$_guile_suffix; ac_word=$2
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+printf %s "checking for $ac_word... " >&6; }
+if test ${ac_cv_path_GUILE_CONFIG+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  case $GUILE_CONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_GUILE_CONFIG="$GUILE_CONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  case $as_dir in #(((
+    '') as_dir=./ ;;
+    */) ;;
+    *) as_dir=$as_dir/ ;;
+  esac
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
+    ac_cv_path_GUILE_CONFIG="$as_dir$ac_word$ac_exec_ext"
+    printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+GUILE_CONFIG=$ac_cv_path_GUILE_CONFIG
+if test -n "$GUILE_CONFIG"; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $GUILE_CONFIG" >&5
+printf "%s\n" "$GUILE_CONFIG" >&6; }
+else
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+fi
+
+
+
+  if test -n "$GUILD"; then
+    GUILE_TOOLS=$GUILD
+  else
+    # Extract the first word of "guile-tools$_guile_suffix", so it can be a program name with args.
+set dummy guile-tools$_guile_suffix; ac_word=$2
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+printf %s "checking for $ac_word... " >&6; }
+if test ${ac_cv_path_GUILE_TOOLS+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  case $GUILE_TOOLS in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_GUILE_TOOLS="$GUILE_TOOLS" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  case $as_dir in #(((
+    '') as_dir=./ ;;
+    */) ;;
+    *) as_dir=$as_dir/ ;;
+  esac
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
+    ac_cv_path_GUILE_TOOLS="$as_dir$ac_word$ac_exec_ext"
+    printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+GUILE_TOOLS=$ac_cv_path_GUILE_TOOLS
+if test -n "$GUILE_TOOLS"; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $GUILE_TOOLS" >&5
+printf "%s\n" "$GUILE_TOOLS" >&6; }
+else
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+fi
+
+
+  fi
+
+
+
+
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Guile site directory" >&5
+printf %s "checking for Guile site directory... " >&6; }
+  GUILE_SITE=`$PKG_CONFIG --print-errors --variable=sitedir guile-$GUILE_EFFECTIVE_VERSION`
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $GUILE_SITE" >&5
+printf "%s\n" "$GUILE_SITE" >&6; }
+  if test "$GUILE_SITE" = ""; then
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+printf "%s\n" "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "sitedir not found
+See \`config.log' for more details" "$LINENO" 5; }
+  fi
+
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Guile site-ccache directory using pkgconfig" >&5
+printf %s "checking for Guile site-ccache directory using pkgconfig... " >&6; }
+  GUILE_SITE_CCACHE=`$PKG_CONFIG --variable=siteccachedir guile-$GUILE_EFFECTIVE_VERSION`
+  if test "$GUILE_SITE_CCACHE" = ""; then
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Guile site-ccache directory using interpreter" >&5
+printf %s "checking for Guile site-ccache directory using interpreter... " >&6; }
+    GUILE_SITE_CCACHE=`$GUILE -c "(display (if (defined? '%site-ccache-dir) (%site-ccache-dir) \"\"))"`
+    if test $? != "0" -o "$GUILE_SITE_CCACHE" = ""; then
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+      GUILE_SITE_CCACHE=""
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: siteccachedir not found" >&5
+printf "%s\n" "$as_me: WARNING: siteccachedir not found" >&2;}
+    fi
+  fi
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $GUILE_SITE_CCACHE" >&5
+printf "%s\n" "$GUILE_SITE_CCACHE" >&6; }
+
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Guile extensions directory" >&5
+printf %s "checking for Guile extensions directory... " >&6; }
+  GUILE_EXTENSION=`$PKG_CONFIG --print-errors --variable=extensiondir guile-$GUILE_EFFECTIVE_VERSION`
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $GUILE_EXTENSION" >&5
+printf "%s\n" "$GUILE_EXTENSION" >&6; }
+  if test "$GUILE_EXTENSION" = ""; then
+    GUILE_EXTENSION=""
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: extensiondir not found" >&5
+printf "%s\n" "$as_me: WARNING: extensiondir not found" >&2;}
+  fi
+
+
 if test "x$GUILD" = "x"; then
    as_fn_error $? "'guild' binary not found; please check your guile-3.x installation." "$LINENO" 5
 fi

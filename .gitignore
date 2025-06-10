@@ -2,3 +2,21 @@ compiled/
 __pycache__/
 *.pyc
 *.pyo
+
+# Build artifacts
+Makefile
+config.status
+libtool
+pre-inst-env
+*.log
+*~
+
+# Autotools cache
+autom4te.cache/
+
+# Source build dependencies
+src/.deps/
+src/Makefile
+.libs/
+*.lo
+*.la
