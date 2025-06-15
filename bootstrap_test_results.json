@@ -5,6 +5,10 @@
       ".guix/manifest.scm",
       ".guix/bootstrap/stage0.scm",
       ".guix/bootstrap/stage0-bootstrap.scm",
+      ".guix/bootstrap/stage1.scm",
+      ".guix/bootstrap/stage2.scm",
+      ".guix/bootstrap/stage3.scm",
+      ".guix/bootstrap/multi-stage-bootstrap.scm",
       ".guix/bootstrap/init-shell.scm"
     ]
   },
@@ -22,6 +26,21 @@
       "apply-guix-security",
       "present-boot-options"
     ]
+  },
+  "multi_stage_structure": {
+    "status": "pass",
+    "stages": [
+      "stage1",
+      "stage2",
+      "stage3",
+      "multi-stage"
+    ],
+    "stage_status": {
+      "stage1": "complete",
+      "stage2": "complete",
+      "stage3": "complete",
+      "multi-stage": "complete"
+    }
   },
   "opencog_structure": {
     "found": [

@@ -70,18 +70,25 @@ The `.guix/manifest.scm` file defines the exact package versions and dependencie
 - Applies Guix-inspired security mechanisms
 
 #### Stage 1: Cognitive Platform Loading
-- Loads CogUtil (core utilities, logging, pattern-matching)
-- Initializes CogServer (distributed server, RPC, message passing)  
-- Sets up AtomSpace (hypergraph memory)
-- Mounts ASFS (AtomSpace FileSystem)
-- Establishes inter-component bridges
+- Loads advanced CogUtil (enhanced logging, pattern-matching, memory management)
+- Initializes distributed CogServer (RPC, message passing, load balancing)  
+- Sets up hypergraph AtomSpace (parallel processing, advanced queries)
+- Mounts advanced ASFS (real-time sync, access control, caching)
+- Establishes inter-component bridges (event bus, data flow optimization)
 
 #### Stage 2: Adaptive System Activation
-- Registers CogServer with AtomSpace and ASFS
-- Starts adaptive attention allocation system
-- Activates symbolic evolution engine
-- Enables self-modification capabilities
-- Launches cognitive feedback loops
+- Activates full system integration (cross-communication, resource sharing)
+- Starts symbolic evolution engine (pattern recognition, evolutionary operators)
+- Enables cognitive feedback loops (self-monitoring, meta-cognition)
+- Launches adaptive attention allocation (dynamic focus, salience calculation)
+- Initializes controlled self-modification (code generation, safety constraints)
+
+#### Stage 3: AGI Emergence & Self-Modification
+- Enables autonomous evolution (advanced mutation, coevolution)
+- Activates meta-learning (algorithm selection, transfer learning)
+- Initializes autonomous goal generation (intrinsic motivation, curiosity)
+- Sets up creative reasoning (analogical reasoning, conceptual blending)
+- Launches AGI emergence coordination (multi-modal reasoning, emergent behavior monitoring)
 
 ## Reproducibility
 
@@ -150,11 +157,25 @@ guix shell -m .guix/manifest.scm
 ### 2. Interactive Development
 
 ```scheme
-;; Load bootstrap
-(load ".guix/bootstrap/init-shell.scm")
+;; Load multi-stage bootstrap
+(load ".guix/bootstrap/multi-stage-bootstrap.scm")
 
 ;; Interactive commands available:
-(stage0-bootstrap)      ; Run full Stage0 bootstrap
+(bootstrap-info)                  ; Show available commands
+(complete-wolfcog-bootstrap)      ; Run full 4-stage bootstrap
+(run-stage0-only)                ; Run Stage0 only
+(run-stages-0-1)                 ; Run Stages 0-1
+(run-stages-0-2)                 ; Run Stages 0-2
+
+;; Individual stage functions:
+(stage0-bootstrap)               ; AGI-OS Initialization
+(stage1-bootstrap stage0-result) ; Cognitive Platform Loading  
+(stage2-bootstrap stage1-result) ; Adaptive System Activation
+(stage3-bootstrap stage2-result) ; AGI Emergence & Self-Modification
+
+;; Legacy single-stage bootstrap
+(load ".guix/bootstrap/init-shell.scm")
+(stage0-bootstrap)      ; Run Stage0 bootstrap only
 (detect-wolfram)        ; Detect Wolfram kernels
 (verify-opencog)        ; Check OpenCog components
 (wolf-shell-info)       ; Show available commands
