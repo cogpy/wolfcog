@@ -22,6 +22,10 @@ class BootstrapTest:
             ".guix/manifest.scm",
             ".guix/bootstrap/stage0.scm", 
             ".guix/bootstrap/stage0-bootstrap.scm",
+            ".guix/bootstrap/stage1.scm",
+            ".guix/bootstrap/stage2.scm", 
+            ".guix/bootstrap/stage3.scm",
+            ".guix/bootstrap/multi-stage-bootstrap.scm",
             ".guix/bootstrap/init-shell.scm"
         ]
         
@@ -84,6 +88,66 @@ class BootstrapTest:
             self.results["bootstrap_content"] = {
                 "status": "pass", 
                 "functions": required_functions
+            }
+            
+    def test_multi_stage_structure(self):
+        """Test that all bootstrap stages are properly implemented"""
+        print("\n🔍 Testing multi-stage bootstrap structure...")
+        
+        stage_files = {
+            "stage1": ".guix/bootstrap/stage1.scm",
+            "stage2": ".guix/bootstrap/stage2.scm", 
+            "stage3": ".guix/bootstrap/stage3.scm",
+            "multi-stage": ".guix/bootstrap/multi-stage-bootstrap.scm"
+        }
+        
+        stage_functions = {
+            "stage1": ["stage1-bootstrap", "load-advanced-cogutil", "init-distributed-cogserver"],
+            "stage2": ["stage2-bootstrap", "activate-system-integration", "start-symbolic-evolution"],
+            "stage3": ["stage3-bootstrap", "enable-autonomous-evolution", "activate-meta-learning"],
+            "multi-stage": ["complete-wolfcog-bootstrap", "execute-stage0", "execute-stage1"]
+        }
+        
+        missing_stages = []
+        stage_status = {}
+        
+        for stage, file_path in stage_files.items():
+            full_path = self.repo_root / file_path
+            if not full_path.exists():
+                missing_stages.append(stage)
+                print(f"  ❌ Missing: {stage} ({file_path})")
+                stage_status[stage] = "missing"
+            else:
+                print(f"  ✓ Found: {stage}")
+                
+                # Check for required functions
+                content = full_path.read_text()
+                missing_funcs = []
+                for func in stage_functions[stage]:
+                    if f"(define ({func}" not in content:
+                        missing_funcs.append(func)
+                    else:
+                        print(f"    ✓ Function: {func}")
+                
+                if missing_funcs:
+                    print(f"    ❌ Missing functions in {stage}: {missing_funcs}")
+                    stage_status[stage] = "incomplete"
+                else:
+                    stage_status[stage] = "complete"
+        
+        if missing_stages:
+            print(f"  ❌ Missing stages: {missing_stages}")
+            self.results["multi_stage_structure"] = {
+                "status": "fail", 
+                "missing_stages": missing_stages,
+                "stage_status": stage_status
+            }
+        else:
+            print("  ✅ All bootstrap stages present and complete")
+            self.results["multi_stage_structure"] = {
+                "status": "pass", 
+                "stages": list(stage_files.keys()),
+                "stage_status": stage_status
             }
             
     def test_opencog_structure(self):
@@ -339,6 +403,7 @@ def main():
     # Run all tests
     tester.test_bootstrap_files_exist()
     tester.test_bootstrap_content_structure()
+    tester.test_multi_stage_structure()
     tester.test_opencog_structure()
     tester.test_kernel_structure()
     tester.test_manifest_content()
