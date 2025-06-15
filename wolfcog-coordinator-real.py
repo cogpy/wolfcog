@@ -157,7 +157,7 @@ class RealPerformanceMonitor:
 
 
 class RealWolfCogCoordinator:
-    """Real WolfCog Coordinator - focused on actual functionality"""
+    """Real WolfCog Coordinator - focused on actual functionality with recursive cognitive flowchart"""
     
     def __init__(self):
         self.symbolic_processor = RealSymbolicProcessor()
@@ -171,6 +171,17 @@ class RealWolfCogCoordinator:
             'admin_agent',
             'director_agent'
         ]
+        
+        # Initialize Recursive Cognitive Flowchart
+        try:
+            sys.path.append(str(self.base_path))
+            from src.recursive_cognitive_flowchart import WolfCogRecursiveCognitiveFlowchart
+            self.cognitive_flowchart = WolfCogRecursiveCognitiveFlowchart()
+            self.flowchart_available = True
+        except ImportError as e:
+            print(f"⚠️ Recursive Cognitive Flowchart not available: {e}")
+            self.cognitive_flowchart = None
+            self.flowchart_available = False
         
         # Setup signal handlers
         signal.signal(signal.SIGINT, self.handle_shutdown)
@@ -191,11 +202,25 @@ class RealWolfCogCoordinator:
             return True
         
     def start_system(self):
-        """Start the real WolfCog system"""
+        """Start the real WolfCog system with recursive cognitive flowchart"""
         print("🚀 Starting Real WolfCog System...")
         print("🔧 Focus: Actual OpenCog integration and symbolic processing")
+        print("🧠 Initializing Recursive Cognitive Flowchart...")
         
         self.running = True
+        
+        # Start recursive cognitive flowchart if available
+        if self.flowchart_available and self.cognitive_flowchart:
+            try:
+                flowchart_success = self.cognitive_flowchart.start_recursive_cognitive_flowchart()
+                if flowchart_success:
+                    print("✨ Recursive Cognitive Flowchart activated")
+                    print("   📍 5-layer architecture: Mock bifurcation → Symbolic core → Agent coordination → Integration → Optimization")
+                else:
+                    print("⚠️ Flowchart initialization incomplete, continuing with basic mode")
+            except Exception as e:
+                print(f"⚠️ Flowchart startup error: {e}")
+                print("📋 Continuing with standard coordinator functionality")
         
         # Start core components
         self._start_core_components()
