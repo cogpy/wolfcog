@@ -19,4 +19,5 @@ src/.deps/
 src/Makefile
 .libs/
 *.lo
-*.la
+*.la*.backup
+actionlint
