@@ -10,11 +10,18 @@ import time
 import json
 import queue
 import subprocess
+import sys
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
+# Add parent directory to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from src.symbolic_processor import RealSymbolicProcessor
 from src.wolfram_opencog_bridge import WolframOpenCogBridge
+from src.type_registry import get_type_registry
+from src.symbolic_patterns import get_pattern_registry
+from src.bridge_monitor import get_bridge_monitor
 
 
 class WolframOpenCogIntegration:
@@ -30,6 +37,11 @@ class WolframOpenCogIntegration:
         self.computation_queue = queue.Queue()
         self.result_queue = queue.Queue()
         
+        # Enhanced components
+        self.type_registry = get_type_registry()
+        self.pattern_registry = get_pattern_registry()
+        self.monitor = get_bridge_monitor()
+        
         # Statistics
         self.stats = {
             "computations_completed": 0,
@@ -37,15 +49,6 @@ class WolframOpenCogIntegration:
             "opencog_operations": 0,
             "bridge_errors": 0,
             "start_time": None
-        }
-        
-        # Integration patterns
-        self.integration_patterns = {
-            "symbolic_solve": self.pattern_symbolic_solve,
-            "pattern_match": self.pattern_pattern_match,
-            "inference_chain": self.pattern_inference_chain,
-            "optimization": self.pattern_optimization,
-            "knowledge_extraction": self.pattern_knowledge_extraction
         }
     
     def initialize(self):
@@ -101,6 +104,9 @@ class WolframOpenCogIntegration:
         print("🔄 Starting integration system...")
         self.running = True
         
+        # Start monitoring
+        self.monitor.start_monitoring()
+        
         # Start processing thread
         process_thread = threading.Thread(target=self.processing_loop)
         process_thread.daemon = True
@@ -116,268 +122,37 @@ class WolframOpenCogIntegration:
                 # Get computation request
                 try:
                     request = self.computation_queue.get(timeout=1.0)
+                    
+                    # Record computation start
+                    start_time = self.monitor.record_computation_start()
+                    
+                    # Process request
                     result = self.process_integration_request(request)
+                    
+                    # Record computation end
+                    success = result.get("success", False)
+                    self.monitor.record_computation_end(start_time, success)
+                    
                     self.result_queue.put(result)
                     self.stats["computations_completed"] += 1
+                    
                 except queue.Empty:
                     continue
                     
             except Exception as e:
                 print(f"❌ Integration processing error: {e}")
                 self.stats["bridge_errors"] += 1
+                self.monitor.record_error("processing_error", str(e))
     
     def process_integration_request(self, request):
-        """Process an integration request"""
+        """Process an integration request using pattern registry"""
         pattern = request.get("pattern", "symbolic_solve")
         data = request.get("data", {})
         
-        if pattern in self.integration_patterns:
-            return self.integration_patterns[pattern](data)
-        else:
-            return {"error": f"Unknown pattern: {pattern}"}
-    
-    def pattern_symbolic_solve(self, data):
-        """Pattern: Solve symbolic equation using both systems"""
-        equation = data.get("equation", "x^2 - 4 == 0")
-        variable = data.get("variable", "x")
+        # Use pattern registry for execution
+        result = self.pattern_registry.execute_pattern(pattern, self, data)
         
-        print(f"🔢 Solving: {equation}")
-        
-        # Step 1: Use Wolfram to solve
-        wolfram_result = self.wolfram_bridge.solve_symbolic_equation(equation)
-        self.stats["wolfram_calls"] += 1
-        
-        # Step 2: Store result in AtomSpace
-        if wolfram_result:
-            atomspace_task = {
-                "type": "add_concept",
-                "data": {
-                    "name": f"Solution_{equation}",
-                    "properties": {"solution": wolfram_result, "equation": equation}
-                }
-            }
-            self.symbolic_processor.submit_task(atomspace_task)
-            time.sleep(0.1)  # Allow processing
-            
-            result = self.symbolic_processor.get_result()
-            self.stats["opencog_operations"] += 1
-            
-            return {
-                "pattern": "symbolic_solve",
-                "equation": equation,
-                "wolfram_solution": wolfram_result,
-                "atomspace_result": result,
-                "success": True
-            }
-        
-        return {"pattern": "symbolic_solve", "success": False, "error": "No solution found"}
-    
-    def pattern_pattern_match(self, data):
-        """Pattern: Advanced pattern matching using both systems"""
-        pattern = data.get("pattern", "X->Y")
-        context = data.get("context", "general")
-        
-        print(f"🔍 Pattern matching: {pattern}")
-        
-        # Step 1: Use AtomSpace for local pattern matching
-        atomspace_task = {
-            "type": "pattern_match",
-            "data": {"pattern": pattern}
-        }
-        self.symbolic_processor.submit_task(atomspace_task)
-        time.sleep(0.1)
-        
-        atomspace_matches = self.symbolic_processor.get_result()
-        self.stats["opencog_operations"] += 1
-        
-        # Step 2: Use Wolfram for advanced pattern analysis
-        if atomspace_matches and "matches" in atomspace_matches:
-            wolfram_analysis = self.wolfram_bridge.pattern_match_with_wolfram({
-                "type": "pattern", 
-                "expression": pattern
-            })
-            self.stats["wolfram_calls"] += 1
-            
-            return {
-                "pattern": "pattern_match",
-                "query_pattern": pattern,
-                "atomspace_matches": atomspace_matches,
-                "wolfram_analysis": wolfram_analysis,
-                "success": True
-            }
-        
-        return {"pattern": "pattern_match", "success": False, "error": "No matches found"}
-    
-    def pattern_inference_chain(self, data):
-        """Pattern: Multi-step inference using both systems"""
-        premises = data.get("premises", [])
-        goal = data.get("goal", "conclusion")
-        
-        print(f"🧠 Inference chain: {premises} -> {goal}")
-        
-        # Step 1: Use AtomSpace for logical inference
-        atomspace_task = {
-            "type": "inference",
-            "data": {"premises": premises}
-        }
-        self.symbolic_processor.submit_task(atomspace_task)
-        time.sleep(0.1)
-        
-        atomspace_conclusions = self.symbolic_processor.get_result()
-        self.stats["opencog_operations"] += 1
-        
-        # Step 2: Use Wolfram for verification and expansion
-        if atomspace_conclusions and "conclusions" in atomspace_conclusions:
-            conclusions = atomspace_conclusions["conclusions"]
-            
-            # Verify each conclusion with Wolfram
-            verified_conclusions = []
-            for conclusion in conclusions:
-                verification = self.wolfram_bridge.execute_wolfram_code(
-                    f"TrueQ[{conclusion}]"
-                )
-                if verification and "True" in str(verification):
-                    verified_conclusions.append(conclusion)
-            
-            self.stats["wolfram_calls"] += len(conclusions)
-            
-            return {
-                "pattern": "inference_chain",
-                "premises": premises,
-                "atomspace_conclusions": conclusions,
-                "verified_conclusions": verified_conclusions,
-                "success": True
-            }
-        
-        return {"pattern": "inference_chain", "success": False, "error": "No conclusions"}
-    
-    def pattern_optimization(self, data):
-        """Pattern: Optimization using Wolfram with AtomSpace storage"""
-        objective = data.get("objective", "x^2 + y^2")
-        variables = data.get("variables", ["x", "y"])
-        constraints = data.get("constraints", [])
-        
-        print(f"⚡ Optimizing: {objective}")
-        
-        # Use Wolfram for optimization
-        wolfram_code = f"NMinimize[{objective}, {{{', '.join(variables)}}}]"
-        optimization_result = self.wolfram_bridge.execute_wolfram_code(wolfram_code)
-        self.stats["wolfram_calls"] += 1
-        
-        if optimization_result:
-            # Store optimization result in AtomSpace
-            atomspace_task = {
-                "type": "add_concept",
-                "data": {
-                    "name": f"Optimization_{objective}",
-                    "properties": {
-                        "objective": objective,
-                        "variables": variables,
-                        "result": optimization_result,
-                        "method": "wolfram_nminimize"
-                    }
-                }
-            }
-            self.symbolic_processor.submit_task(atomspace_task)
-            time.sleep(0.1)
-            
-            storage_result = self.symbolic_processor.get_result()
-            self.stats["opencog_operations"] += 1
-            
-            return {
-                "pattern": "optimization",
-                "objective": objective,
-                "wolfram_result": optimization_result,
-                "atomspace_storage": storage_result,
-                "success": True
-            }
-        
-        return {"pattern": "optimization", "success": False, "error": "Optimization failed"}
-    
-    def pattern_knowledge_extraction(self, data):
-        """Pattern: Extract knowledge from text using both systems"""
-        text = data.get("text", "")
-        domain = data.get("domain", "general")
-        
-        print(f"📚 Extracting knowledge from text...")
-        
-        # Use Wolfram for text analysis
-        wolfram_analysis = self.wolfram_bridge.execute_wolfram_code(
-            f'TextAnalyze["{text}"]'
-        )
-        self.stats["wolfram_calls"] += 1
-        
-        if wolfram_analysis:
-            # Extract concepts and relations
-            concepts = self.extract_concepts_from_analysis(wolfram_analysis)
-            relations = self.extract_relations_from_analysis(wolfram_analysis)
-            
-            # Store in AtomSpace
-            for concept in concepts:
-                atomspace_task = {
-                    "type": "add_concept",
-                    "data": {"name": concept, "properties": {"domain": domain, "source": "text"}}
-                }
-                self.symbolic_processor.submit_task(atomspace_task)
-                time.sleep(0.01)
-            
-            for relation in relations:
-                atomspace_task = {
-                    "type": "add_relation",
-                    "data": {
-                        "source": relation["source"],
-                        "target": relation["target"],
-                        "relation_type": relation["type"]
-                    }
-                }
-                self.symbolic_processor.submit_task(atomspace_task)
-                time.sleep(0.01)
-            
-            self.stats["opencog_operations"] += len(concepts) + len(relations)
-            
-            return {
-                "pattern": "knowledge_extraction",
-                "text_length": len(text),
-                "concepts_extracted": len(concepts),
-                "relations_extracted": len(relations),
-                "wolfram_analysis": wolfram_analysis,
-                "success": True
-            }
-        
-        return {"pattern": "knowledge_extraction", "success": False, "error": "Analysis failed"}
-    
-    def extract_concepts_from_analysis(self, analysis):
-        """Extract concepts from Wolfram text analysis"""
-        # Simplified concept extraction
-        if isinstance(analysis, str):
-            words = analysis.split()
-            concepts = [word for word in words if len(word) > 3 and word.isalpha()]
-            return concepts[:10]  # Limit to 10 concepts
-        return []
-    
-    def extract_relations_from_analysis(self, analysis):
-        """Extract relations from Wolfram text analysis"""
-        # Simplified relation extraction
-        relations = []
-        if isinstance(analysis, str):
-            # Look for simple patterns like "X is Y" or "X has Y"
-            import re
-            patterns = [
-                r'(\w+) is (\w+)',
-                r'(\w+) has (\w+)',
-                r'(\w+) and (\w+)'
-            ]
-            
-            for pattern in patterns:
-                matches = re.findall(pattern, analysis)
-                for match in matches:
-                    relations.append({
-                        "source": match[0],
-                        "target": match[1],
-                        "type": "relates_to"
-                    })
-        
-        return relations[:5]  # Limit to 5 relations
+        return result
     
     def submit_computation(self, pattern, data):
         """Submit a computation request"""
@@ -410,6 +185,20 @@ class WolframOpenCogIntegration:
         
         if self.wolfram_bridge:
             stats["wolfram_bridge"] = self.wolfram_bridge.get_statistics()
+        
+        # Add monitor metrics and health
+        stats["monitor_metrics"] = self.monitor.get_metrics()
+        stats["health_status"] = self.monitor.get_health_status()
+        
+        # Add available patterns
+        stats["available_patterns"] = self.pattern_registry.list_patterns()
+        
+        # Add type mappings count
+        type_mappings = self.type_registry.get_all_mappings()
+        stats["type_mappings_count"] = {
+            "wolfram_to_atomspace": len(type_mappings["wolfram_to_atomspace"]),
+            "atomspace_to_wolfram": len(type_mappings["atomspace_to_wolfram"])
+        }
         
         return stats
     
@@ -468,6 +257,9 @@ class WolframOpenCogIntegration:
         """Stop the integration system"""
         print("🛑 Stopping Wolfram-OpenCog Integration...")
         self.running = False
+        
+        # Stop monitoring
+        self.monitor.stop_monitoring()
         
         if self.symbolic_processor:
             self.symbolic_processor.stop()
