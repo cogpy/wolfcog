@@ -228,7 +228,7 @@ def test_bridge_monitor():
         for i in range(10):
             start_time = monitor.record_computation_start()
             time.sleep(0.001)
-            success = i % 5 != 0  # 20% failure rate
+            success = i % 5 != 0  # 80% success rate (8 out of 10 succeed)
             monitor.record_computation_end(start_time, success)
         
         metrics = monitor.get_metrics()
