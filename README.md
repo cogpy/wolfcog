@@ -12,6 +12,7 @@ Perfect for assembling the **meta-root of a symbolic OS** using **Guix/Guile** a
 🔗 **LibraryLinkUtils, GitLink, CascadeLink** - Advanced integration layers
 🧠 **OpenCog interfacing** - AtomSpace symbolic memory integration
 🧬 **Symbolic evolution engine** - Self-modifying and self-improving capabilities
+☁️ **Wolfram Enterprise Private Cloud** - Full EPC infrastructure with API deployment
 
 ## Architecture
 
@@ -25,6 +26,12 @@ wolfcog/
 │   ├── wolfnode-guile.scm # Guile execution nodes
 │   ├── ecron.wl          # Symbolic tensor scheduler
 │   └── meta-shellwalker.wl# Self-modifying shell
+├── epc/                   # Wolfram Enterprise Private Cloud
+│   ├── compute_engine.py  # Kernel pool management
+│   ├── api_interface.py   # REST API deployment
+│   ├── authentication.py  # User provisioning
+│   ├── master_node.py     # Service coordination
+│   └── deployment_manager.py # Deployment orchestration
 ├── link/                 # Integration layers
 │   ├── LibraryLinkUtils/ # Wolfram-C++ bridges
 │   ├── GitLink/          # Self-modifying code mgmt
@@ -184,6 +191,27 @@ WolfCog now supports an extended set of cognitive actions:
 - **Admin Agent**: Persistent monitoring agent for system health and optimization
 - **Director Agent**: Logical reasoning agent for system coordination and inference
 
+### Wolfram Enterprise Private Cloud
+
+- **Compute Engine**: Managed pool of Wolfram Language kernels with parallelization
+- **API Interface**: Single-command deployment of Wolfram functions as REST APIs
+- **Authentication System**: Self-provisioning users with subdomain-based access control
+- **Master Node**: Centralized coordination of all EPC services and compute nodes
+- **Deployment Manager**: Multiple deployment scenarios (apps, computation center, embedded, reporting)
+- **Platform Support**: Development Platform, Mathematica Online, Mobile/Desktop interfaces
+
+**Quick Start:**
+```bash
+# Start the EPC infrastructure
+python3 epc_coordinator.py
+
+# Access APIs at http://localhost:5000
+# Deploy Wolfram functions as REST endpoints
+# Manage users and deployments
+```
+
+See [EPC Documentation](docs/epc-documentation.md) for complete details.
+
 ## Design Philosophy
 
 WolfCog implements a cognitive architecture where:
@@ -209,6 +237,7 @@ WolfCog implements a cognitive architecture where:
 - [Kernel Specification](docs/kernel-spec.md) - Detailed kernel documentation
 - [Symbolic Evolution](docs/symbolic-evolution.md) - Self-modification and improvement
 - [Next Steps Implementation](docs/next-steps-implementation.md) - Recently implemented cognitive capabilities
+- [EPC Documentation](docs/epc-documentation.md) - **Wolfram Enterprise Private Cloud infrastructure**
 
 ## Development
 

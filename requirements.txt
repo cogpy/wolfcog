@@ -11,3 +11,7 @@ requests>=2.25.0
 
 # Optional enhancements
 psutil>=5.8.0  # For system monitoring in agents
+
+# Wolfram Enterprise Private Cloud dependencies
+flask>=2.0.0  # Web framework for API interface
+flask-socketio>=5.0.0  # WebSocket support for real-time features
