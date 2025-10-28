@@ -270,7 +270,13 @@ class AuthenticationSystem:
         self._save_users()
     
     def _hash_password(self, password: str) -> str:
-        """Hash password using SHA-256"""
+        """
+        Hash password using SHA-256 with salt
+        
+        Note: For production use, consider using bcrypt, argon2, or PBKDF2
+        which are specifically designed for password hashing with
+        computational cost parameters.
+        """
         salt = secrets.token_hex(16)
         pwd_hash = hashlib.sha256((password + salt).encode()).hexdigest()
         return f"{salt}${pwd_hash}"

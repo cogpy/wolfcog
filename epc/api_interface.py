@@ -189,9 +189,12 @@ class APIInterface:
                 # Update metrics
                 self._update_metrics(endpoint.name, False, time.time() - start_time)
                 
+                # Log the full error internally but only return generic message
+                print(f"API Error in {endpoint.name}: {str(e)}")
+                
                 return jsonify({
                     "status": "error",
-                    "error": str(e),
+                    "error": "Internal server error processing request",
                     "endpoint": endpoint.name,
                     "timestamp": time.time()
                 }), 500
