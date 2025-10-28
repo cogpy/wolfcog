@@ -7,6 +7,7 @@ Integrates with WolfCog's security model.
 """
 
 import hashlib
+from argon2 import PasswordHasher
 import secrets
 import time
 from pathlib import Path
@@ -271,23 +272,19 @@ class AuthenticationSystem:
     
     def _hash_password(self, password: str) -> str:
         """
-        Hash password using SHA-256 with salt
+        Hash password using Argon2id
         
-        Note: For production use, consider using bcrypt, argon2, or PBKDF2
-        which are specifically designed for password hashing with
-        computational cost parameters.
+        Uses Argon2 with default parameters for secure password storage.
         """
-        salt = secrets.token_hex(16)
-        pwd_hash = hashlib.sha256((password + salt).encode()).hexdigest()
-        return f"{salt}${pwd_hash}"
+        ph = PasswordHasher()
+        return ph.hash(password)
     
     def _verify_password(self, password: str, password_hash: str) -> bool:
-        """Verify password against hash"""
+        """Verify password against hash using Argon2"""
+        ph = PasswordHasher()
         try:
-            salt, pwd_hash = password_hash.split('$')
-            check_hash = hashlib.sha256((password + salt).encode()).hexdigest()
-            return check_hash == pwd_hash
-        except:
+            return ph.verify(password_hash, password)
+        except Exception:
             return False
     
     def _generate_api_key(self) -> str:
