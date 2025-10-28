@@ -1,4 +1,14 @@
-$ cd /home/runner/work/oc-util/oc-util && grep -A 20 -B 5 "apt install" .github/workflows/adaptive-ci.yml
+name: Adaptive CI - Build and Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
 # Contributors Guide:
 # ===================
 # 
@@ -25,7 +35,31 @@ $ cd /home/runner/work/oc-util/oc-util && grep -A 20 -B 5 "apt install" .github/
 # 1. Add specialized dependencies in the 'dependencies' job
 # 2. Create separate job for pattern encoding tests
 # 3. Add artifact uploads for pattern analysis results
---
+
+jobs:
+  dependencies:
+    name: Install and Cache Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Step 1: Checkout Repository
+    # ---------------------------
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    # Step 2: Cache Dependencies
+    # --------------------------
+    - name: Cache Dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          /usr/include
+          /usr/lib
+        key: ${{ runner.os }}-deps-${{ hashFiles('**/CMakeLists.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-deps-
+
+    # Step 3: Install Build Essential Tools
     # --------------------------------
     # Core compilation tools required for C++17 and CMake builds
     - name: Install Build Essential Tools
@@ -45,7 +79,7 @@ $ cd /home/runner/work/oc-util/oc-util && grep -A 20 -B 5 "apt install" .github/
         g++ --version | head -1
         cmake --version | head -1
 
-    # Step 5: Install Guile Development Environment
+    # Step 4: Install Guile Development Environment
     # --------------------------------------------
     # CRITICAL: Guile 2.2.2+ is mandatory for the project
     # Contributors: Update version if project requirements change
@@ -76,7 +110,9 @@ $ cd /home/runner/work/oc-util/oc-util && grep -A 20 -B 5 "apt install" .github/
           exit 1
         fi
 
---
+    # Step 5: Install GMP Development Headers
+    # ---------------------------------------
+    # GNU Multiple Precision Arithmetic Library
     - name: Install GMP Development Headers
       run: |
         echo "🔢 Installing GMP (GNU Multiple Precision Arithmetic Library)..."
@@ -103,7 +139,12 @@ $ cd /home/runner/work/oc-util/oc-util && grep -A 20 -B 5 "apt install" .github/
           echo "Searching for gmp.h..."
           find /usr -name "gmp.h" -type f 2>/dev/null | head -3
           exit 1
---
+        fi
+
+    # Step 6: Install Boost Libraries
+    # -------------------------------
+    # Comprehensive Boost development package
+    - name: Install Boost Libraries
       run: |
         echo "🚀 Installing Boost libraries..."
         
@@ -126,7 +167,7 @@ $ cd /home/runner/work/oc-util/oc-util && grep -A 20 -B 5 "apt install" .github/
           exit 1
         fi
 
-    # Step 8: Install Additional Development Dependencies  
+    # Step 7: Install Additional Development Dependencies  
     # --------------------------------------------------
     # Additional libraries that may be needed for extended functionality
     # Contributors: Add new dependencies here as needed
@@ -148,7 +189,7 @@ $ cd /home/runner/work/oc-util/oc-util && grep -A 20 -B 5 "apt install" .github/
         
         echo "✅ Additional dependencies installed successfully"
 
-    # Step 9: Dependency Verification Summary
+    # Step 8: Dependency Verification Summary
     # ---------------------------------------
     # Comprehensive verification that all dependencies are properly installed
     - name: Verify All Dependencies
@@ -156,7 +197,33 @@ $ cd /home/runner/work/oc-util/oc-util && grep -A 20 -B 5 "apt install" .github/
         echo "🔍 Performing comprehensive dependency verification..."
         
         # Create verification report
---
+        echo "Dependencies installed and verified successfully!"
+
+  build:
+    name: Build Project
+    runs-on: ubuntu-latest
+    needs: dependencies
+    
+    steps:
+    # Step 1: Checkout Repository
+    # ---------------------------
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    # Step 2: Restore Cached Dependencies
+    # -----------------------------------
+    - name: Restore Cached Dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          /usr/include
+          /usr/lib
+        key: ${{ runner.os }}-deps-${{ hashFiles('**/CMakeLists.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-deps-
+
+    # Step 3: Install Dependencies
+    # ----------------------------
     # Quick reinstall of dependencies (should be fast due to caching)
     - name: Install Dependencies
       run: |
@@ -183,4 +250,3 @@ $ cd /home/runner/work/oc-util/oc-util && grep -A 20 -B 5 "apt install" .github/
         mkdir -p build
         cd build
         echo "Build directory created: $(pwd)"
-<exited with exit code 0>
