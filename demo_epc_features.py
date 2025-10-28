@@ -119,7 +119,7 @@ def demo_authentication():
         password="admin123",
         roles=["admin"]
     )
-    print(f"   ✓ Admin user: {admin.username} (API key: {admin.api_key[:20]}...)")
+    print(f"   ✓ Admin user: {admin.username}")
     
     dev = auth.register_user(
         username="developer",
