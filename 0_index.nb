@@ -1,0 +1,161 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 12.1' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      5619,        152]
+NotebookOptionsPosition[      4401,        124]
+NotebookOutlinePosition[      4741,        139]
+CellTagsIndexPosition[      4698,        136]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Wolfram Enterprise Private Cloud Documentation", "Title"],
+
+Cell[TextData[StyleBox["20 September 2020\nFor Wolfram Enterprise Private \
+Cloud 1.55.1",
+ FontSize->12]], "Subtitle",
+ CellChangeTimes->{{3.759788917342111*^9, 3.759788945309317*^9}, {
+  3.773534128768162*^9, 3.773534137351035*^9}, {3.809360788090088*^9, 
+  3.809360820197075*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["Table of Contents", "Section"],
+
+Cell[CellGroupData[{
+
+Cell[TextData[ButtonBox["Chapter 1: Introduction",
+ BaseStyle->"Hyperlink",
+ ButtonData->{
+   URL["https://www.wolframcloud.com/obj/documentation/epc-documentation/1_\
+Introduction.nb"], None},
+ ButtonNote->
+  "https://www.wolframcloud.com/obj/documentation/epc-documentation/1_\
+Introduction.nb"]], "Item",
+ CellChangeTimes->{{3.759788834394299*^9, 3.759788852646188*^9}, {
+  3.7597890384480877`*^9, 3.759789038448575*^9}}],
+
+Cell[TextData[ButtonBox["Chapter 2: Wolfram Enterprise Private Cloud \
+Architecture",
+ BaseStyle->"Hyperlink",
+ ButtonData->{
+   URL["https://www.wolframcloud.com/obj/documentation/epc-documentation/2_\
+ServerSide.nb"], None},
+ ButtonNote->
+  "https://www.wolframcloud.com/obj/documentation/epc-documentation/2_\
+ServerSide.nb"]], "Item",
+ CellChangeTimes->{{3.759788834394299*^9, 3.759788870679422*^9}, {
+  3.759789099447462*^9, 3.759789099447934*^9}}],
+
+Cell[TextData[ButtonBox["Chapter 3: Setup",
+ BaseStyle->"Hyperlink",
+ ButtonData->{
+   URL["https://www.wolframcloud.com/obj/documentation/epc-documentation/3_\
+Setup.nb"], None},
+ ButtonNote->
+  "https://www.wolframcloud.com/obj/documentation/epc-documentation/3_Setup.\
+nb"]], "Item",
+ CellChangeTimes->{{3.759788834394299*^9, 3.759788835811195*^9}, {
+  3.7597888730135813`*^9, 3.759788877733748*^9}, {3.759789054243039*^9, 
+  3.759789054243486*^9}}],
+
+Cell[TextData[ButtonBox["Chapter 4: Allocating Kernel Resources",
+ BaseStyle->"Hyperlink",
+ ButtonData->{
+   URL["https://www.wolframcloud.com/obj/documentation/epc-documentation/4_\
+AllocatingKernels.nb"], None},
+ ButtonNote->
+  "https://www.wolframcloud.com/obj/documentation/epc-documentation/4_\
+AllocatingKernels.nb"]], "Item",
+ CellChangeTimes->{{3.759788834394299*^9, 3.7597888361037607`*^9}, {
+  3.759788879102249*^9, 3.759788888275662*^9}, {3.759789065692916*^9, 
+  3.75978906569342*^9}}],
+
+Cell[TextData[ButtonBox["Chapter 5: Lifecycle of a Kernel",
+ BaseStyle->"Hyperlink",
+ ButtonData->{
+   URL["https://www.wolframcloud.com/obj/documentation/epc-documentation/5_\
+KernelLifecycle.nb"], None},
+ ButtonNote->
+  "https://www.wolframcloud.com/obj/documentation/epc-documentation/5_\
+KernelLifecycle.nb"]], "Item",
+ CellChangeTimes->{{3.759788834394299*^9, 3.759788836358818*^9}, {
+  3.759788889838543*^9, 3.759788901311767*^9}, {3.7597890769861603`*^9, 
+  3.759789076986587*^9}}],
+
+Cell[TextData[ButtonBox["Chapter 6: Administrative Tasks and Troubleshooting",
+ 
+ BaseStyle->"Hyperlink",
+ ButtonData->{
+   URL["https://www.wolframcloud.com/obj/documentation/epc-documentation/6_\
+AdminTasks.nb"], None},
+ ButtonNote->
+  "https://www.wolframcloud.com/obj/documentation/epc-documentation/6_\
+AdminTasks.nb"]], "Item",
+ CellChangeTimes->{{3.759788834394299*^9, 3.759788836547742*^9}, {
+  3.759788903457902*^9, 3.759788914225584*^9}, {3.7597891118651733`*^9, 
+  3.759789111865651*^9}, {3.759789845701147*^9, 3.7597898458126574`*^9}}],
+
+Cell[TextData[ButtonBox["Chapter 7: Navigating the Private Cloud Client",
+ BaseStyle->"Hyperlink",
+ ButtonData->{
+   URL["https://www.wolframcloud.com/obj/documentation/epc-documentation/7_\
+ClientSide.nb"], None},
+ ButtonNote->
+  "https://www.wolframcloud.com/obj/documentation/epc-documentation/7_\
+ClientSide.nb"]], "Item",
+ CellChangeTimes->{
+  3.759788834394299*^9, {3.759788990960162*^9, 3.759789001221232*^9}, {
+   3.759789122868374*^9, 3.759789122868801*^9}}]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{808, 911},
+WindowMargins->{{398, Automatic}, {Automatic, -261}},
+FrontEndVersion->"12.1 for Mac OS X x86 (64-bit) (June 19, 2020)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 63, 0, 70, "Title",ExpressionUUID->"4541440a-2fcd-4482-ba97-c79947e2ef2a"],
+Cell[646, 24, 283, 5, 70, "Subtitle",ExpressionUUID->"a035393a-dbc7-4e1d-8fa3-a543f3928ca2"],
+Cell[CellGroupData[{
+Cell[954, 33, 36, 0, 70, "Section",ExpressionUUID->"31a58fe8-385d-4c3e-aff5-f47beb4b585d"],
+Cell[CellGroupData[{
+Cell[1015, 37, 424, 9, 70, "Item",ExpressionUUID->"27dfb0f5-2b5e-46c5-9b2a-1b69d7390dbd"],
+Cell[1442, 48, 453, 10, 70, "Item",ExpressionUUID->"7979b855-db05-407f-a82a-eec0f672d452"],
+Cell[1898, 60, 452, 10, 70, "Item",ExpressionUUID->"c83cffe7-8ca2-4f64-921a-d96ac44a55be"],
+Cell[2353, 72, 497, 10, 70, "Item",ExpressionUUID->"9c094205-77e4-48d6-9220-82b31e473913"],
+Cell[2853, 84, 488, 10, 70, "Item",ExpressionUUID->"6614375a-f602-46a4-aa21-f1cb237a667b"],
+Cell[3344, 96, 547, 11, 70, "Item",ExpressionUUID->"a282c7da-1e54-45a9-a9d8-09bd2110dee6"],
+Cell[3894, 109, 467, 10, 70, "Item",ExpressionUUID->"56302945-6ea4-422f-bc97-07c6f09e33e8"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
